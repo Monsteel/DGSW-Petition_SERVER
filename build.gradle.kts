@@ -20,6 +20,19 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+    implementation ("org.springframework.boot:spring-boot-starter-data-jpa")
+    implementation ("org.springframework.boot:spring-boot-starter-thymeleaf")
+    implementation ("org.springframework.boot:spring-boot-starter-web")
+    implementation ("org.modelmapper:modelmapper:2.1.1")
+    implementation ("com.google.code.gson:gson:2.8.6")
+    implementation ("mysql:mysql-connector-java")
+
+    implementation ("javax.validation:validation-api:2.0.1.Final")
+    runtimeOnly ("com.h2database:h2")
+    annotationProcessor ("org.projectlombok:lombok")
+    testImplementation ("org.springframework.boot:spring-boot-starter-test")
+    testImplementation ("org.springframework.security:spring-security-test")
 }
 
 tasks.withType<KotlinCompile> {
