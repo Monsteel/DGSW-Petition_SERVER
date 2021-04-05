@@ -1,0 +1,13 @@
+spring.jpa.show-sql=true
+
+spring.jpa.generate-ddl=true
+
+spring.jpa.database=
+
+spring.datasource.url=
+spring.datasource.username=
+spring.datasource.password=
+spring.datasource.driver-class-name=
+
+spring.jpa.database-platform=
+
