@@ -8,23 +8,27 @@ import io.github.monsteel.petition.domain.model.Response
 import io.github.monsteel.petition.domain.model.auth.UserInquiry
 import io.github.monsteel.petition.domain.model.auth.UserToken
 import io.github.monsteel.petition.service.AuthService
+import io.github.monsteel.petition.service.AuthServiceImpl
 import io.github.monsteel.petition.service.JwtService
+import io.github.monsteel.petition.service.JwtServiceImpl
 import io.github.monsteel.petition.util.enum.JwtType
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
+import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
 import java.lang.Exception
-import javax.validation.Valid
+import javax.validation.*
 
 @CrossOrigin
 @RestController
 @RequestMapping("/auth")
+@Controller
 class AuthController {
     @Autowired
-    private lateinit var authService: AuthService
+    private lateinit var authService: AuthServiceImpl
 
     @Autowired
-    private lateinit var jwtService: JwtService
+    private lateinit var jwtService: JwtServiceImpl
 
     /**
      * 회원가입 API
@@ -46,7 +50,7 @@ class AuthController {
         val refreshToken: String = jwtService.createToken(userIdx, JwtType.REFRESH)
         val data = UserToken(accessToken, refreshToken)
 
-        return DataResponse(HttpStatus.OK.value(), "로그인 성공", data)
+        return DataResponse(HttpStatus.OK, "로그인 성공", data)
     }
 
     /**
@@ -62,6 +66,6 @@ class AuthController {
             data.isRegistered = true
         }
 
-        return DataResponse(HttpStatus.OK.value(), "조회 성공", data)
+        return DataResponse(HttpStatus.OK, "조회 성공", data)
     }
 }
