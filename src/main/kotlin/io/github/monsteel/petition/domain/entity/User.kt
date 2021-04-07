@@ -23,10 +23,11 @@ class User() {
     // 가입 날짜
     @CreationTimestamp()
     @Column(nullable = false)
-    var createdAt: Date = Date()
+    var createdAt: Date? = null
 
-    constructor(userID: String?, permissionType: PermissionType?) {
+    constructor(userID: String?, permissionType: PermissionType?): this() {
         this.userID = userID
         this.permissionType = permissionType
+        this.createdAt = Date()
     }
 }
