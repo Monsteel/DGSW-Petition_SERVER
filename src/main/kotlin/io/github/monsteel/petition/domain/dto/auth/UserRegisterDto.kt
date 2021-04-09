@@ -1,8 +1,11 @@
-package io.github.monsteel.petition.domain.dto
+package io.github.monsteel.petition.domain.dto.auth
 
 import javax.validation.constraints.NotBlank
 
-class UserLoginDto {
+class UserRegisterDto {
+    @NotBlank
+    var permissionKey: String? = null
+
     @NotBlank
     val userID: String? = null
 

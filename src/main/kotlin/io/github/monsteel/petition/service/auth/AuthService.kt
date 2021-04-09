@@ -1,7 +1,7 @@
-package io.github.monsteel.petition.service
+package io.github.monsteel.petition.service.auth
 
-import io.github.monsteel.petition.domain.dto.UserLoginDto
-import io.github.monsteel.petition.domain.dto.UserRegisterDto
+import io.github.monsteel.petition.domain.dto.auth.UserLoginDto
+import io.github.monsteel.petition.domain.dto.auth.UserRegisterDto
 
 interface AuthService {
     fun register(userRegisterDto: UserRegisterDto)
