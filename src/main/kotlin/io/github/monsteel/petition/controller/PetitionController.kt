@@ -1,6 +1,9 @@
 package io.github.monsteel.petition.controller
 
 import io.github.monsteel.petition.domain.model.Response
+import io.github.monsteel.petition.service.petition.bulletin.PetitionServiceImpl
+import io.github.monsteel.petition.util.enum.PetitionFetchType
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Controller
 import org.springframework.web.bind.annotation.*
@@ -10,23 +13,25 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/petition")
 @Controller
 class PetitionController {
+    @Autowired
+    private lateinit var petitionService: PetitionServiceImpl
 
     /**
      * 청원 조회 API
      */
     //TODO: Page 개념으로 접근
-    @GetMapping("/")
+    @GetMapping("")
     fun getPetitions(): Response {
-        //TODO
+        petitionService.fetchPetitions(1,20, PetitionFetchType.ON_GOING)
         return Response(HttpStatus.OK, "청원 조회 성공")
     }
 
     /**
      * 청원 작성 API
      */
-    @PostMapping("/")
+    @PostMapping("")
     fun writePetition(): Response {
-        //TODO
+//        petitionService.writePetition()
         return Response(HttpStatus.OK, "청원 작성 완료")
     }
 
@@ -72,6 +77,7 @@ class PetitionController {
     /**
      * 동의 조회 API
      */
+    //TODO: Page 개념으로 접근
     @GetMapping("/agree")
     fun getAgree(): Response {
         //TODO

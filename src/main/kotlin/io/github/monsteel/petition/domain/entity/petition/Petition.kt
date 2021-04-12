@@ -1,5 +1,6 @@
 package io.github.monsteel.petition.domain.entity.petition
 
+import io.github.monsteel.petition.util.extension.getPetitionValidityDate
 import org.hibernate.annotations.CreationTimestamp
 import java.util.*
 import javax.persistence.*
@@ -20,6 +21,10 @@ class Petition {
     @Column(nullable = false)
     var createdAt: Date = Date()
 
+    // 청원 날짜
+    @CreationTimestamp()
+    @Column(nullable = false)
+    var expirationDate: Date = createdAt.getPetitionValidityDate()
 
     // 카테고리
     @Column(nullable = false, unique = true)
@@ -45,4 +50,6 @@ class Petition {
     // 검색태그
     @Column(nullable = true, unique = true)
     var tKeyword:String? = null
+
+
 }
