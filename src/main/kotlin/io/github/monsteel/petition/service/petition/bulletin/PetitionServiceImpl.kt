@@ -8,7 +8,11 @@ import io.github.monsteel.petition.util.enum.PetitionFetchType
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.server.ResponseStatusException
+import org.springframework.web.server.ServerErrorException
 
 @Service
 class PetitionServiceImpl:PetitionService {
@@ -63,8 +67,12 @@ class PetitionServiceImpl:PetitionService {
         petitionRepo.save(petition)
     }
 
-    override fun editPetition(idx:Long, petitionDto: PetitionDto) {
+    override fun editPetition(idx:Long, petitionDto: PetitionDto, userID:String) {
         val updatePetition = petitionRepo.findByIdx(idx)
+
+        if(updatePetition.writerID != userID) {
+            throw HttpClientErrorException(HttpStatus.UNAUTHORIZED, "권한 없음")
+        }
 
         updatePetition.mod(
             petitionDto.category,
@@ -78,7 +86,13 @@ class PetitionServiceImpl:PetitionService {
         petitionRepo.save(updatePetition)
     }
 
-    override fun deletePetition(idx:Long) {
+    override fun deletePetition(idx:Long, userID:String) {
+        val deletePetition = petitionRepo.findByIdx(idx)
+
+        if(deletePetition.writerID != userID) {
+            throw HttpClientErrorException(HttpStatus.UNAUTHORIZED, "권한 없음")
+        }
+
         petitionRepo.deleteById(idx)
     }
 

@@ -11,10 +11,13 @@ import io.github.monsteel.petition.service.jwt.JwtServiceImpl
 import io.github.monsteel.petition.service.petition.agree.AgreeServiceImpl
 import io.github.monsteel.petition.service.petition.answer.AnswerServiceImpl
 import io.github.monsteel.petition.service.petition.bulletin.PetitionServiceImpl
+import io.github.monsteel.petition.util.Constant
+import io.github.monsteel.petition.util.enum.PermissionType
 import io.github.monsteel.petition.util.enum.PetitionFetchType
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
+import org.springframework.web.client.HttpClientErrorException
 
 @CrossOrigin
 @RestController
@@ -88,7 +91,13 @@ class PetitionController {
                      @PathVariable("idx") idx: Long,
                      @RequestBody petitionDto: PetitionDto): Response {
         val user = jwtService.validateToken(token)
-        petitionService.editPetition(idx, petitionDto)
+        val agreeCount = agreeService.fetchAgreeCount(idx)
+
+        if(agreeCount > Constant.DO_NOT_MODIFY_AGREE_COUNT && user!!.permissionType == PermissionType.STUDENT) {
+            throw HttpClientErrorException(HttpStatus.UNAUTHORIZED, "최소 동의인원을 초과하여 수정할 수 없음")
+        }
+
+        petitionService.editPetition(idx, petitionDto, user!!.userID!!)
         return Response(HttpStatus.OK, "청원 수정 완료")
     }
 
@@ -99,7 +108,13 @@ class PetitionController {
     fun deletePetition(@RequestHeader("x-access-tone") token:String,
                        @PathVariable("idx") idx: Long): Response {
         val user = jwtService.validateToken(token)
-        petitionService.deletePetition(idx)
+        val agreeCount = agreeService.fetchAgreeCount(idx)
+
+        if(agreeCount > Constant.DO_NOT_MODIFY_AGREE_COUNT && user!!.permissionType == PermissionType.STUDENT) {
+            throw HttpClientErrorException(HttpStatus.UNAUTHORIZED, "최소 동의인원을 초과하여 수정할 수 없음")
+        }
+
+        petitionService.deletePetition(idx, user!!.userID!!)
         return Response(HttpStatus.OK, "청원 삭제 완료")
     }
 
@@ -123,7 +138,12 @@ class PetitionController {
     fun addAnswer(@RequestHeader("x-access-tone") token:String,
                   @RequestBody answerDto: AnswerDto): Response {
         val user = jwtService.validateToken(token)
-        answerService.writeAnswer(answerDto,user!!.userID!!)
+
+        if(user!!.permissionType != PermissionType.EXECUTIVE){
+            throw HttpClientErrorException(HttpStatus.UNAUTHORIZED, "권한 없음")
+        }
+
+        answerService.writeAnswer(answerDto,user.userID!!)
         return Response(HttpStatus.OK, "답변 등록 완료")
     }
 
@@ -131,7 +151,6 @@ class PetitionController {
     /**
      * 동의 조회 API
      */
-    //TODO: Page 개념으로 접근
     @GetMapping("/agree")
     fun getAgree(@RequestHeader("x-access-tone") token:String,
                  @RequestParam(value="page") page:Int,
@@ -145,6 +164,7 @@ class PetitionController {
     /**
      * 청원 동의 API
      */
+    //TODO: 한번만 동의 할 수 있는 로직 추가
     @PostMapping("/agree")
     fun agree(@RequestHeader("x-access-tone") token:String,
               @RequestBody agreeDto: AgreeDto): Response {

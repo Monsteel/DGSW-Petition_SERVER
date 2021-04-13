@@ -7,7 +7,9 @@ import io.github.monsteel.petition.domain.repository.petition.AgreeRepo
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
+import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
+import org.springframework.web.client.HttpClientErrorException
 
 @Service
 class AgreeServiceImpl:AgreeService {
@@ -25,6 +27,12 @@ class AgreeServiceImpl:AgreeService {
 
     override fun writeAgree(agreeDto: AgreeDto, userID:String) {
         val agree = Agree()
+
+        val isAgree = agreeRepo.findAllByPetitionIdxAndWriterID(agreeDto.petitionIdx!!, userID).isNotEmpty()
+
+        if(isAgree){
+            throw HttpClientErrorException(HttpStatus.BAD_REQUEST, "이미 동의한 청원")
+        }
 
         agree.petitionIdx = agreeDto.petitionIdx
         agree.content = agreeDto.content

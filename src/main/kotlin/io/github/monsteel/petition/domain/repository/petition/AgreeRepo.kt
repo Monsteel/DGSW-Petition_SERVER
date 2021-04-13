@@ -10,4 +10,5 @@ import org.springframework.stereotype.Repository
 interface AgreeRepo:JpaRepository<Agree, Long> {
     fun findAllByPetitionIdx(petitionIdx: Long, pageable: Pageable): List<Agree>
     fun findAllByPetitionIdx(petitionIdx: Long): List<Agree>
+    fun findAllByPetitionIdxAndWriterID(petitionIdx: Long, writerID: String): List<Agree>
 }

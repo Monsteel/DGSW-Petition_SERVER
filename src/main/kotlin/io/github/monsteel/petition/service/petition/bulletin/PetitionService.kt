@@ -13,7 +13,7 @@ interface PetitionService {
 
     fun writePetition(petitionDto: PetitionDto, userID:String)
 
-    fun editPetition(idx:Long, petitionDto: PetitionDto)
+    fun editPetition(idx:Long, petitionDto: PetitionDto, userID:String)
 
-    fun deletePetition(idx:Long)
+    fun deletePetition(idx:Long, userID:String)
 }
