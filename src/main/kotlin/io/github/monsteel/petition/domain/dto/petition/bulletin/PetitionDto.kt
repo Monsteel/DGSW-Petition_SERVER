@@ -2,7 +2,7 @@ package io.github.monsteel.petition.domain.dto.petition.bulletin
 
 import javax.validation.constraints.NotBlank
 
-class PetitionWriteDto {
+class PetitionDto {
     @NotBlank
     var category: String? = null
 

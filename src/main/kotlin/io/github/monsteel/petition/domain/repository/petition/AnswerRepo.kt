@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface AnswerRepo:JpaRepository<Answer,String> {
-
+interface AnswerRepo:JpaRepository<Answer,Long> {
+    fun findAllByPetitionIdx(petitionIdx: Long): List<Answer>
 }

@@ -1,6 +1,6 @@
 package io.github.monsteel.petition.service.petition.bulletin
 
-import io.github.monsteel.petition.domain.dto.petition.bulletin.PetitionWriteDto
+import io.github.monsteel.petition.domain.dto.petition.bulletin.PetitionDto
 import io.github.monsteel.petition.domain.entity.petition.Petition
 import io.github.monsteel.petition.domain.repository.petition.AnswerRepo
 import io.github.monsteel.petition.domain.repository.petition.PetitionRepo
@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
 import org.springframework.data.domain.Sort
 import org.springframework.stereotype.Service
-import java.util.*
 
 @Service
 class PetitionServiceImpl:PetitionService {
@@ -46,31 +45,31 @@ class PetitionServiceImpl:PetitionService {
         return petitionRepo.findAll(PageRequest.of(0, 10, Sort.by("동의 수").descending()))
     }
 
-    override fun writePetition(petitionWriteDto: PetitionWriteDto) {
+    override fun writePetition(petitionDto: PetitionDto) {
         val petition = Petition()
 
         petition.init(
-            petitionWriteDto.category,
-            petitionWriteDto.title,
-            petitionWriteDto.content,
-            petitionWriteDto.fKeyword,
-            petitionWriteDto.sKeyword,
-            petitionWriteDto.tKeyword
+            petitionDto.category,
+            petitionDto.title,
+            petitionDto.content,
+            petitionDto.fKeyword,
+            petitionDto.sKeyword,
+            petitionDto.tKeyword
         )
 
         petitionRepo.save(petition)
     }
 
-    override fun editPetition(idx:Long, petitionWriteDto: PetitionWriteDto) {
+    override fun editPetition(idx:Long, petitionDto: PetitionDto) {
         val petition = Petition()
 
         petition.init(
-            petitionWriteDto.category,
-            petitionWriteDto.title,
-            petitionWriteDto.content,
-            petitionWriteDto.fKeyword,
-            petitionWriteDto.sKeyword,
-            petitionWriteDto.tKeyword
+            petitionDto.category,
+            petitionDto.title,
+            petitionDto.content,
+            petitionDto.fKeyword,
+            petitionDto.sKeyword,
+            petitionDto.tKeyword
         )
 
         petitionRepo.updatePetition(idx, petition)

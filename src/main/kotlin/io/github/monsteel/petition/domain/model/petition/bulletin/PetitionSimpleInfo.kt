@@ -1,4 +1,4 @@
-package io.github.monsteel.petition.domain.model.petition
+package io.github.monsteel.petition.domain.model.petition.bulletin
 
 import java.util.*
 

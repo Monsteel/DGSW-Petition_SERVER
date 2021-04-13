@@ -1,8 +1,8 @@
-package io.github.monsteel.petition.domain.model.petition
+package io.github.monsteel.petition.domain.model.petition.bulletin
 
 import java.util.*
 
-class PetitionDetailsInfo {
+class PetitionDetailInfo {
     var idx: Long? = null
 
     var writerID: String
