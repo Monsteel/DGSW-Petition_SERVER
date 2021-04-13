@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.ResponseBody
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
+import java.lang.Exception
 import javax.servlet.http.HttpServletResponse
 
 import javax.servlet.http.HttpServletRequest
@@ -22,6 +23,12 @@ class GlobalExceptionHandler {
     @ExceptionHandler(HttpServerErrorException::class)
     fun handleHttpServerErrorException(req: HttpServletRequest, res: HttpServletResponse, e: HttpServerErrorException): Response? {
         res.status = e.statusCode.value()
+        return Response(e.statusCode, e.statusText)
+    }
+
+    @ExceptionHandler(Exception::class)
+    fun handleHttpGlobalException(req: HttpServletRequest, res: HttpServletResponse, e: HttpServerErrorException): Response? {
+        res.status = 500
         return Response(e.statusCode, e.statusText)
     }
 }

@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 import org.springframework.web.client.HttpClientErrorException
+import javax.validation.Valid
 
 @CrossOrigin
 @RestController
@@ -39,7 +40,7 @@ class PetitionController {
      * 청원 조회 API
      */
     @GetMapping("")
-    fun getPetitions(@RequestHeader("x-access-tone") token:String,
+    fun getPetitions(@RequestHeader("x-access-token") token:String,
                      @RequestParam(value="page") page:Int,
                      @RequestParam(value="size") size:Int,
                      @RequestParam(value="type", defaultValue = "3") type:Int): Response {
@@ -58,7 +59,7 @@ class PetitionController {
      * 청원 검색 API
      */
     @GetMapping("/search")
-    fun searchPetitions(@RequestHeader("x-access-tone") token:String,
+    fun searchPetitions(@RequestHeader("x-access-token") token:String,
                         @RequestParam(value="page") page:Int,
                         @RequestParam(value="size") size:Int,
                         @RequestParam(value="keyword") keyword:String): Response {
@@ -76,8 +77,8 @@ class PetitionController {
      * 청원 작성 API
      */
     @PostMapping("")
-    fun writePetition(@RequestHeader("x-access-tone") token:String,
-                      @RequestBody petitionDto: PetitionDto): Response {
+    fun writePetition(@RequestHeader("x-access-token") token:String,
+                      @RequestBody @Valid petitionDto: PetitionDto): Response {
         val user = jwtService.validateToken(token)
         petitionService.writePetition(petitionDto, user!!.userID!!)
         return Response(HttpStatus.OK, "청원 작성 완료")
@@ -87,9 +88,9 @@ class PetitionController {
      * 청원 수정 API
      */
     @PutMapping("/{idx}")
-    fun editPetition(@RequestHeader("x-access-tone") token:String,
+    fun editPetition(@RequestHeader("x-access-token") token:String,
                      @PathVariable("idx") idx: Long,
-                     @RequestBody petitionDto: PetitionDto): Response {
+                     @RequestBody @Valid petitionDto: PetitionDto): Response {
         val user = jwtService.validateToken(token)
         val agreeCount = agreeService.fetchAgreeCount(idx)
 
@@ -105,7 +106,7 @@ class PetitionController {
      * 청원 삭제 API
      */
     @DeleteMapping("/{idx}")
-    fun deletePetition(@RequestHeader("x-access-tone") token:String,
+    fun deletePetition(@RequestHeader("x-access-token") token:String,
                        @PathVariable("idx") idx: Long): Response {
         val user = jwtService.validateToken(token)
         val agreeCount = agreeService.fetchAgreeCount(idx)
@@ -124,7 +125,7 @@ class PetitionController {
      * 답변 조회 API
      */
     @GetMapping("/answer")
-    fun getAnswer(@RequestHeader("x-access-tone") token:String,
+    fun getAnswer(@RequestHeader("x-access-token") token:String,
                   @RequestParam("petitionIdx") petitionIdx: Long): Response {
         val user = jwtService.validateToken(token)
         val answerDetailInfoList = answerService.fetchAnswer(petitionIdx).map { AnswerDetailInfo(it.idx!!, it.petitionIdx!!, it.writerID!!, it.createdAt, it.content!!) }
@@ -135,8 +136,8 @@ class PetitionController {
      * 답변 등록 API
      */
     @PostMapping("/answer")
-    fun addAnswer(@RequestHeader("x-access-tone") token:String,
-                  @RequestBody answerDto: AnswerDto): Response {
+    fun addAnswer(@RequestHeader("x-access-token") token:String,
+                  @RequestBody @Valid answerDto: AnswerDto): Response {
         val user = jwtService.validateToken(token)
 
         if(user!!.permissionType != PermissionType.EXECUTIVE){
@@ -152,7 +153,7 @@ class PetitionController {
      * 동의 조회 API
      */
     @GetMapping("/agree")
-    fun getAgree(@RequestHeader("x-access-tone") token:String,
+    fun getAgree(@RequestHeader("x-access-token") token:String,
                  @RequestParam(value="page") page:Int,
                  @RequestParam(value="size") size:Int,
                  @RequestParam(value="petitionIdx") petitionIdx:Long): Response {
@@ -164,10 +165,9 @@ class PetitionController {
     /**
      * 청원 동의 API
      */
-    //TODO: 한번만 동의 할 수 있는 로직 추가
     @PostMapping("/agree")
-    fun agree(@RequestHeader("x-access-tone") token:String,
-              @RequestBody agreeDto: AgreeDto): Response {
+    fun agree(@RequestHeader("x-access-token") token:String,
+              @RequestBody @Valid agreeDto: AgreeDto): Response {
         val user = jwtService.validateToken(token)
         agreeService.writeAgree(agreeDto, user!!.userID!!)
         return Response(HttpStatus.OK, "청원 동의 완료")
