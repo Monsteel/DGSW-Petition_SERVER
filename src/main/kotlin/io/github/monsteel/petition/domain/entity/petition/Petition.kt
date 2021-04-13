@@ -10,10 +10,11 @@ class Petition {
     // 청원 번호
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "idx",unique = true)
     var idx: Long? = null
 
     // 청원인 아이디
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     var writerID: String? = null
 
     // 청원 날짜
@@ -27,44 +28,63 @@ class Petition {
     var expirationDate: Date = createdAt.getPetitionValidityDate()
 
     // 카테고리
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     var category: String? = null
 
     // 청원 제목
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     var title:String? = null
 
     // 청원 내용
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     var content:String? = null
 
 
     // 검색태그
-    @Column(nullable = true, unique = true)
-    var fKeyword:String? = null
+    @Column(nullable = true)
+    var firstKeyword:String? = null
 
     // 검색태그
-    @Column(nullable = true, unique = true)
-    var sKeyword:String? = null
+    @Column(nullable = true)
+    var secondKeyword:String? = null
 
     // 검색태그
-    @Column(nullable = true, unique = true)
-    var tKeyword:String? = null
+    @Column(nullable = true)
+    var thirdKeyword:String? = null
+
 
     fun init(
+        writerID: String?,
         category: String?,
         title: String?,
         content: String?,
-        fKeyword: String?,
-        sKeyword: String?,
-        tKeyword: String?
+        firstKeyword: String?,
+        secondKeyword: String?,
+        thirdKeyword: String?
+    ) {
+        this.writerID = writerID
+        this.category = category
+        this.title = title
+        this.content = content
+        this.firstKeyword = firstKeyword
+        this.secondKeyword = secondKeyword
+        this.thirdKeyword = thirdKeyword
+    }
+
+    fun mod(
+        category: String?,
+        title: String?,
+        content: String?,
+        firstKeyword: String?,
+        secondKeyword: String?,
+        thirdKeyword: String?
     ) {
         this.category = category
         this.title = title
         this.content = content
-        this.fKeyword = fKeyword
-        this.sKeyword = sKeyword
-        this.tKeyword = tKeyword
+        this.firstKeyword = firstKeyword
+        this.secondKeyword = secondKeyword
+        this.thirdKeyword = thirdKeyword
     }
 
 

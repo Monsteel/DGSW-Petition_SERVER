@@ -12,11 +12,9 @@ class PetitionDto {
     @NotBlank
     var content:String? = null
 
-    var fKeyword:String? = null
+    var firstKeyword:String? = null
 
-    var sKeyword:String? = null
+    var secondKeyword:String? = null
 
-    var tKeyword:String? = null
-
-
+    var thirdKeyword:String? = null
 }

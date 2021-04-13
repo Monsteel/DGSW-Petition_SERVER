@@ -23,56 +23,57 @@ class PetitionServiceImpl:PetitionService {
 
         return when(type) {
             PetitionFetchType.ON_GOING ->
-                petitionRepo.findValidPetition(pageable)
+                petitionRepo.findAllByExpirationDateAfter(pageable)
 
             PetitionFetchType.TERMINATED ->
-                petitionRepo.findInvalidPetition(pageable)
+                petitionRepo.findAllByExpirationDateBefore(pageable)
 
             PetitionFetchType.FINISHED ->
-                answerRepo.findAll().map { it.petitionIdx!! }.map { petitionRepo.findAllByIdx(it, pageable) }
+                answerRepo.findAll().map { petitionRepo.findByIdx(it.petitionIdx!!) }
 
             PetitionFetchType.ALL ->
-                petitionRepo.findAll(pageable)
+                petitionRepo.findAll(pageable).toList()
         }
     }
 
     override fun searchPetition(page:Int, size:Int, keyword:String): List<Petition> {
         val pageable = PageRequest.of(page, size, Sort.by("createdAt").descending())
-        return petitionRepo.findAllByTitleContainingOrFKeywordContainingOrSKeywordContainingOrTKeywordContaining(keyword,keyword,keyword,keyword,pageable)
+        return petitionRepo.findAllByTitleContainsOrFirstKeywordContainsOrSecondKeywordContainsOrThirdKeywordContains(keyword,keyword,keyword,keyword,pageable)
     }
 
     override fun fetchTopTenPetition(page:Int, size:Int): List<Petition> {
-        return petitionRepo.findAll(PageRequest.of(0, 10, Sort.by("동의 수").descending()))
+        return petitionRepo.findAll(PageRequest.of(0, 10, Sort.by("동의 수").descending())).toList()
     }
 
     override fun writePetition(petitionDto: PetitionDto) {
         val petition = Petition()
 
         petition.init(
+            "011013",
             petitionDto.category,
             petitionDto.title,
             petitionDto.content,
-            petitionDto.fKeyword,
-            petitionDto.sKeyword,
-            petitionDto.tKeyword
+            petitionDto.firstKeyword,
+            petitionDto.secondKeyword,
+            petitionDto.thirdKeyword
         )
 
         petitionRepo.save(petition)
     }
 
     override fun editPetition(idx:Long, petitionDto: PetitionDto) {
-        val petition = Petition()
+        val updatePetition = petitionRepo.findByIdx(idx)
 
-        petition.init(
+        updatePetition.mod(
             petitionDto.category,
             petitionDto.title,
             petitionDto.content,
-            petitionDto.fKeyword,
-            petitionDto.sKeyword,
-            petitionDto.tKeyword
+            petitionDto.firstKeyword,
+            petitionDto.secondKeyword,
+            petitionDto.thirdKeyword
         )
 
-        petitionRepo.updatePetition(idx, petition)
+        petitionRepo.save(updatePetition)
     }
 
     override fun deletePetition(idx:Long) {
