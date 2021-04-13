@@ -15,7 +15,7 @@ class AnswerServiceImpl:AnswerService {
         return answerRepo.findAllByPetitionIdx(petitionIdx)
     }
 
-    fun writePetition(answerDto: AnswerDto) {
+    override fun writeAnswer(answerDto: AnswerDto) {
         val answer = Answer()
 
         answer.petitionIdx = answerDto.petitionIdx

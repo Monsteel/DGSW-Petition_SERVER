@@ -1,11 +1,13 @@
 package io.github.monsteel.petition.controller
 
+import io.github.monsteel.petition.domain.dto.petition.agree.AgreeDto
 import io.github.monsteel.petition.domain.dto.petition.answer.AnswerDto
 import io.github.monsteel.petition.domain.dto.petition.bulletin.PetitionDto
 import io.github.monsteel.petition.domain.model.DataResponse
 import io.github.monsteel.petition.domain.model.Response
 import io.github.monsteel.petition.domain.model.petition.answer.AnswerDetailInfo
 import io.github.monsteel.petition.domain.model.petition.bulletin.PetitionSimpleInfo
+import io.github.monsteel.petition.service.petition.agree.AgreeServiceImpl
 import io.github.monsteel.petition.service.petition.answer.AnswerServiceImpl
 import io.github.monsteel.petition.service.petition.bulletin.PetitionServiceImpl
 import io.github.monsteel.petition.util.enum.PetitionFetchType
@@ -23,6 +25,9 @@ class PetitionController {
     @Autowired
     private lateinit var answerService: AnswerServiceImpl
 
+    @Autowired
+    private lateinit var agreeService: AgreeServiceImpl
+
     /**
      * 청원 조회 API
      */
@@ -32,7 +37,7 @@ class PetitionController {
                      @RequestParam(value="type", defaultValue = "3") type:Int): Response {
 
         val petitionSimpleArray = petitionService.fetchPetitions(page, size, PetitionFetchType.values().first { it.value == type }).map {
-            val agreeCount = 0 //TODO: 동의 조회
+            val agreeCount = agreeService.fetchAgreeCount(it.idx!!)
             val isAnswer = answerService.fetchAnswer(it.idx!!).isNotEmpty()
             PetitionSimpleInfo(it.idx, it.expirationDate, it.category!!, it.title!!,agreeCount,isAnswer)
         }
@@ -49,7 +54,7 @@ class PetitionController {
                         @RequestParam(value="keyword") keyword:String): Response {
 
         val petitionSimpleArray = petitionService.searchPetition(page, size, keyword).map {
-            val agreeCount = 0 //TODO: 동의 조회
+            val agreeCount = agreeService.fetchAgreeCount(it.idx!!)
             val isAnswer = answerService.fetchAnswer(it.idx!!).isNotEmpty()
             PetitionSimpleInfo(it.idx, it.expirationDate, it.category!!, it.title!!,agreeCount,isAnswer)
         }
@@ -100,8 +105,8 @@ class PetitionController {
      * 답변 등록 API
      */
     @PostMapping("/answer")
-    fun addAnswer(answerDto: AnswerDto): Response {
-        answerService.writePetition(answerDto)
+    fun addAnswer(@RequestBody answerDto: AnswerDto): Response {
+        answerService.writeAnswer(answerDto)
         return Response(HttpStatus.OK, "답변 등록 완료")
     }
 
@@ -111,17 +116,19 @@ class PetitionController {
      */
     //TODO: Page 개념으로 접근
     @GetMapping("/agree")
-    fun getAgree(): Response {
-        //TODO
-        return Response(HttpStatus.OK, "동의 조회 성공")
+    fun getAgree(@RequestParam(value="page") page:Int,
+                 @RequestParam(value="size") size:Int,
+                 @RequestParam(value="petitionIdx") petitionIdx:Long): Response {
+        val agreeList = agreeService.fetchAgree(page, size, petitionIdx)
+        return DataResponse(HttpStatus.OK, "동의 조회 성공", agreeList)
     }
 
     /**
      * 청원 동의 API
      */
     @PostMapping("/agree")
-    fun agree(): Response {
-        //TODO
+    fun agree(@RequestBody agreeDto: AgreeDto): Response {
+        agreeService.writeAgree(agreeDto)
         return Response(HttpStatus.OK, "청원 동의 완료")
     }
 }
