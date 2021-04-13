@@ -20,7 +20,6 @@ import javax.validation.*
 @CrossOrigin
 @RestController
 @RequestMapping("/auth")
-@Controller
 class AuthController {
     @Autowired
     private lateinit var authService: AuthServiceImpl

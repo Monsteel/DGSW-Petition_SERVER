@@ -51,5 +51,21 @@ class Petition {
     @Column(nullable = true, unique = true)
     var tKeyword:String? = null
 
+    fun init(
+        category: String?,
+        title: String?,
+        content: String?,
+        fKeyword: String?,
+        sKeyword: String?,
+        tKeyword: String?
+    ) {
+        this.category = category
+        this.title = title
+        this.content = content
+        this.fKeyword = fKeyword
+        this.sKeyword = sKeyword
+        this.tKeyword = tKeyword
+    }
+
 
 }

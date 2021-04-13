@@ -1,5 +1,6 @@
 package io.github.monsteel.petition.service.petition.bulletin
 
+import io.github.monsteel.petition.domain.dto.petition.bulletin.PetitionWriteDto
 import io.github.monsteel.petition.domain.entity.petition.Petition
 import io.github.monsteel.petition.domain.repository.petition.AnswerRepo
 import io.github.monsteel.petition.domain.repository.petition.PetitionRepo
@@ -45,11 +46,33 @@ class PetitionServiceImpl:PetitionService {
         return petitionRepo.findAll(PageRequest.of(0, 10, Sort.by("동의 수").descending()))
     }
 
-    override fun writePetition(petition: Petition) {
+    override fun writePetition(petitionWriteDto: PetitionWriteDto) {
+        val petition = Petition()
+
+        petition.init(
+            petitionWriteDto.category,
+            petitionWriteDto.title,
+            petitionWriteDto.content,
+            petitionWriteDto.fKeyword,
+            petitionWriteDto.sKeyword,
+            petitionWriteDto.tKeyword
+        )
+
         petitionRepo.save(petition)
     }
 
-    override fun editPetition(idx:Long, petition: Petition) {
+    override fun editPetition(idx:Long, petitionWriteDto: PetitionWriteDto) {
+        val petition = Petition()
+
+        petition.init(
+            petitionWriteDto.category,
+            petitionWriteDto.title,
+            petitionWriteDto.content,
+            petitionWriteDto.fKeyword,
+            petitionWriteDto.sKeyword,
+            petitionWriteDto.tKeyword
+        )
+
         petitionRepo.updatePetition(idx, petition)
     }
 
