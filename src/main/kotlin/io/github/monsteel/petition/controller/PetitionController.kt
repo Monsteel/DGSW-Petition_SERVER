@@ -37,6 +37,23 @@ class PetitionController {
     }
 
     /**
+     * 청원 조회 API
+     */
+    @GetMapping("/search")
+    fun searchPetitions(@RequestParam(value="page") page:Int,
+                        @RequestParam(value="size") size:Int,
+                        @RequestParam(value="keyword") keyword:String): Response {
+
+        val petitionSimpleArray = petitionService.searchPetition(page, size, keyword).map {
+            val  agreeCount = 0 //TODO: 동의 조회
+            val isAnswer = false //TODO: 답변 조회
+            PetitionSimpleInfo(it.idx, it.expirationDate, it.category!!, it.title!!,agreeCount,isAnswer)
+        }
+
+        return DataResponse(HttpStatus.OK, "청원 검색 성공", petitionSimpleArray)
+    }
+
+    /**
      * 청원 작성 API
      */
     @PostMapping("")
