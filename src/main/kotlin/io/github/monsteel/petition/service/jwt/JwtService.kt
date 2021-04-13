@@ -1,4 +1,4 @@
-package io.github.monsteel.petition.service
+package io.github.monsteel.petition.service.jwt
 
 import io.github.monsteel.petition.domain.entity.User
 import io.github.monsteel.petition.util.enum.JwtType

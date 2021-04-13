@@ -1,7 +1,7 @@
-package io.github.monsteel.petition.service
+package io.github.monsteel.petition.service.auth
 
-import io.github.monsteel.petition.domain.dto.UserLoginDto
-import io.github.monsteel.petition.domain.dto.UserRegisterDto
+import io.github.monsteel.petition.domain.dto.auth.UserLoginDto
+import io.github.monsteel.petition.domain.dto.auth.UserRegisterDto
 import io.github.monsteel.petition.domain.entity.User
 import io.github.monsteel.petition.domain.repository.OAuthRepo
 import io.github.monsteel.petition.domain.repository.UserRepo

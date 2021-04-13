@@ -1,16 +1,14 @@
 package io.github.monsteel.petition.controller
 
 
-import io.github.monsteel.petition.domain.dto.UserLoginDto
-import io.github.monsteel.petition.domain.dto.UserRegisterDto
+import io.github.monsteel.petition.domain.dto.auth.UserLoginDto
+import io.github.monsteel.petition.domain.dto.auth.UserRegisterDto
 import io.github.monsteel.petition.domain.model.DataResponse
 import io.github.monsteel.petition.domain.model.Response
 import io.github.monsteel.petition.domain.model.auth.UserInquiry
 import io.github.monsteel.petition.domain.model.auth.UserToken
-import io.github.monsteel.petition.service.AuthService
-import io.github.monsteel.petition.service.AuthServiceImpl
-import io.github.monsteel.petition.service.JwtService
-import io.github.monsteel.petition.service.JwtServiceImpl
+import io.github.monsteel.petition.service.auth.AuthServiceImpl
+import io.github.monsteel.petition.service.jwt.JwtServiceImpl
 import io.github.monsteel.petition.util.enum.JwtType
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
@@ -22,7 +20,6 @@ import javax.validation.*
 @CrossOrigin
 @RestController
 @RequestMapping("/auth")
-@Controller
 class AuthController {
     @Autowired
     private lateinit var authService: AuthServiceImpl
