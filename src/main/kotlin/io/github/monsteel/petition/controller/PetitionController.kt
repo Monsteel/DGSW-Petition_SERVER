@@ -7,6 +7,7 @@ import io.github.monsteel.petition.domain.model.DataResponse
 import io.github.monsteel.petition.domain.model.Response
 import io.github.monsteel.petition.domain.model.petition.answer.AnswerDetailInfo
 import io.github.monsteel.petition.domain.model.petition.bulletin.PetitionSimpleInfo
+import io.github.monsteel.petition.service.jwt.JwtServiceImpl
 import io.github.monsteel.petition.service.petition.agree.AgreeServiceImpl
 import io.github.monsteel.petition.service.petition.answer.AnswerServiceImpl
 import io.github.monsteel.petition.service.petition.bulletin.PetitionServiceImpl
@@ -28,13 +29,18 @@ class PetitionController {
     @Autowired
     private lateinit var agreeService: AgreeServiceImpl
 
+    @Autowired
+    private lateinit var jwtService: JwtServiceImpl
+
     /**
      * 청원 조회 API
      */
     @GetMapping("")
-    fun getPetitions(@RequestParam(value="page") page:Int,
+    fun getPetitions(@RequestHeader("x-access-tone") token:String,
+                     @RequestParam(value="page") page:Int,
                      @RequestParam(value="size") size:Int,
                      @RequestParam(value="type", defaultValue = "3") type:Int): Response {
+        val user = jwtService.validateToken(token)
 
         val petitionSimpleArray = petitionService.fetchPetitions(page, size, PetitionFetchType.values().first { it.value == type }).map {
             val agreeCount = agreeService.fetchAgreeCount(it.idx!!)
@@ -49,10 +55,11 @@ class PetitionController {
      * 청원 검색 API
      */
     @GetMapping("/search")
-    fun searchPetitions(@RequestParam(value="page") page:Int,
+    fun searchPetitions(@RequestHeader("x-access-tone") token:String,
+                        @RequestParam(value="page") page:Int,
                         @RequestParam(value="size") size:Int,
                         @RequestParam(value="keyword") keyword:String): Response {
-
+        val user = jwtService.validateToken(token)
         val petitionSimpleArray = petitionService.searchPetition(page, size, keyword).map {
             val agreeCount = agreeService.fetchAgreeCount(it.idx!!)
             val isAnswer = answerService.fetchAnswer(it.idx!!).isNotEmpty()
@@ -66,8 +73,10 @@ class PetitionController {
      * 청원 작성 API
      */
     @PostMapping("")
-    fun writePetition(@RequestBody petitionDto: PetitionDto): Response {
-        petitionService.writePetition(petitionDto)
+    fun writePetition(@RequestHeader("x-access-tone") token:String,
+                      @RequestBody petitionDto: PetitionDto): Response {
+        val user = jwtService.validateToken(token)
+        petitionService.writePetition(petitionDto, user!!.userID!!)
         return Response(HttpStatus.OK, "청원 작성 완료")
     }
 
@@ -75,8 +84,10 @@ class PetitionController {
      * 청원 수정 API
      */
     @PutMapping("/{idx}")
-    fun editPetition(@PathVariable("idx") idx: Long,
+    fun editPetition(@RequestHeader("x-access-tone") token:String,
+                     @PathVariable("idx") idx: Long,
                      @RequestBody petitionDto: PetitionDto): Response {
+        val user = jwtService.validateToken(token)
         petitionService.editPetition(idx, petitionDto)
         return Response(HttpStatus.OK, "청원 수정 완료")
     }
@@ -85,7 +96,9 @@ class PetitionController {
      * 청원 삭제 API
      */
     @DeleteMapping("/{idx}")
-    fun deletePetition(@PathVariable("idx") idx: Long): Response {
+    fun deletePetition(@RequestHeader("x-access-tone") token:String,
+                       @PathVariable("idx") idx: Long): Response {
+        val user = jwtService.validateToken(token)
         petitionService.deletePetition(idx)
         return Response(HttpStatus.OK, "청원 삭제 완료")
     }
@@ -96,7 +109,9 @@ class PetitionController {
      * 답변 조회 API
      */
     @GetMapping("/answer")
-    fun getAnswer(@RequestParam("petitionIdx") petitionIdx: Long): Response {
+    fun getAnswer(@RequestHeader("x-access-tone") token:String,
+                  @RequestParam("petitionIdx") petitionIdx: Long): Response {
+        val user = jwtService.validateToken(token)
         val answerDetailInfoList = answerService.fetchAnswer(petitionIdx).map { AnswerDetailInfo(it.idx!!, it.petitionIdx!!, it.writerID!!, it.createdAt, it.content!!) }
         return DataResponse(HttpStatus.OK, "답변 조회 성공", answerDetailInfoList)
     }
@@ -105,8 +120,10 @@ class PetitionController {
      * 답변 등록 API
      */
     @PostMapping("/answer")
-    fun addAnswer(@RequestBody answerDto: AnswerDto): Response {
-        answerService.writeAnswer(answerDto)
+    fun addAnswer(@RequestHeader("x-access-tone") token:String,
+                  @RequestBody answerDto: AnswerDto): Response {
+        val user = jwtService.validateToken(token)
+        answerService.writeAnswer(answerDto,user!!.userID!!)
         return Response(HttpStatus.OK, "답변 등록 완료")
     }
 
@@ -116,9 +133,11 @@ class PetitionController {
      */
     //TODO: Page 개념으로 접근
     @GetMapping("/agree")
-    fun getAgree(@RequestParam(value="page") page:Int,
+    fun getAgree(@RequestHeader("x-access-tone") token:String,
+                 @RequestParam(value="page") page:Int,
                  @RequestParam(value="size") size:Int,
                  @RequestParam(value="petitionIdx") petitionIdx:Long): Response {
+        val user = jwtService.validateToken(token)
         val agreeList = agreeService.fetchAgree(page, size, petitionIdx)
         return DataResponse(HttpStatus.OK, "동의 조회 성공", agreeList)
     }
@@ -127,8 +146,10 @@ class PetitionController {
      * 청원 동의 API
      */
     @PostMapping("/agree")
-    fun agree(@RequestBody agreeDto: AgreeDto): Response {
-        agreeService.writeAgree(agreeDto)
+    fun agree(@RequestHeader("x-access-tone") token:String,
+              @RequestBody agreeDto: AgreeDto): Response {
+        val user = jwtService.validateToken(token)
+        agreeService.writeAgree(agreeDto, user!!.userID!!)
         return Response(HttpStatus.OK, "청원 동의 완료")
     }
 }

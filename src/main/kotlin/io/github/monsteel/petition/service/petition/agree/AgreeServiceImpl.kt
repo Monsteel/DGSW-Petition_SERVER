@@ -23,11 +23,12 @@ class AgreeServiceImpl:AgreeService {
         return agreeRepo.findAllByPetitionIdx(petitionIdx, pageable)
     }
 
-    override fun writeAgree(agreeDto: AgreeDto) {
+    override fun writeAgree(agreeDto: AgreeDto, userID:String) {
         val agree = Agree()
 
         agree.petitionIdx = agreeDto.petitionIdx
         agree.content = agreeDto.content
+        agree.writerID = userID
 
         agreeRepo.save(agree)
     }

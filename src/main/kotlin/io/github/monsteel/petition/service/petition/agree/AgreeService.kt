@@ -10,5 +10,5 @@ interface AgreeService {
 
     fun fetchAgree(page:Int, size:Int, petitionIdx:Long): List<Agree>
 
-    fun writeAgree(agreeDto: AgreeDto)
+    fun writeAgree(agreeDto: AgreeDto, userID:String)
 }

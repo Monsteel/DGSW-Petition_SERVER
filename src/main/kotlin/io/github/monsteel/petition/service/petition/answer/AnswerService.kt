@@ -6,5 +6,5 @@ import io.github.monsteel.petition.domain.entity.petition.Answer
 interface AnswerService {
     fun fetchAnswer(petitionIdx:Long): List<Answer>
 
-    fun writeAnswer(answerDto: AnswerDto)
+    fun writeAnswer(answerDto: AnswerDto, userID:String)
 }

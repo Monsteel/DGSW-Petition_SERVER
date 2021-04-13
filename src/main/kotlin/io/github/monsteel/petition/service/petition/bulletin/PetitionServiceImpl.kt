@@ -15,6 +15,8 @@ class PetitionServiceImpl:PetitionService {
     @Autowired
     private lateinit var petitionRepo: PetitionRepo
 
+
+
     @Autowired
     private lateinit var answerRepo: AnswerRepo
 
@@ -45,11 +47,11 @@ class PetitionServiceImpl:PetitionService {
         return petitionRepo.findAll(PageRequest.of(0, 10, Sort.by("동의 수").descending())).toList()
     }
 
-    override fun writePetition(petitionDto: PetitionDto) {
+    override fun writePetition(petitionDto: PetitionDto, userID:String) {
         val petition = Petition()
 
         petition.init(
-            "011013",
+            userID,
             petitionDto.category,
             petitionDto.title,
             petitionDto.content,

@@ -11,7 +11,7 @@ interface PetitionService {
 
     fun fetchTopTenPetition(page:Int, size:Int): List<Petition>
 
-    fun writePetition(petitionDto: PetitionDto)
+    fun writePetition(petitionDto: PetitionDto, userID:String)
 
     fun editPetition(idx:Long, petitionDto: PetitionDto)
 
