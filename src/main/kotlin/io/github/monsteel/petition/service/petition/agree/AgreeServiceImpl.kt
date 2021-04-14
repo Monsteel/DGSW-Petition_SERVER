@@ -10,22 +10,23 @@ import org.springframework.data.domain.Sort
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpClientErrorException
+import org.springframework.web.client.HttpServerErrorException
+import reactor.core.publisher.Mono
 
 @Service
-class AgreeServiceImpl:AgreeService {
-    @Autowired
-    private lateinit var agreeRepo: AgreeRepo
-
-    override fun fetchAgreeCount(petitionIdx:Long): Int {
-        return agreeRepo.findAllByPetitionIdx(petitionIdx).count()
+class AgreeServiceImpl(
+    private val agreeRepo: AgreeRepo
+):AgreeService {
+    override fun fetchAgreeCount(petitionIdx:Long): Mono<Int> {
+        return Mono.just(agreeRepo.findAllByPetitionIdx(petitionIdx).count())
     }
 
-    override fun fetchAgree(page:Int, size:Int, petitionIdx:Long): List<Agree> {
+    override fun fetchAgree(page:Int, size:Int, petitionIdx:Long): Mono<List<Agree>> {
         val pageable = PageRequest.of(page, size, Sort.by("idx").descending())
-        return agreeRepo.findAllByPetitionIdx(petitionIdx, pageable)
+        return Mono.just(agreeRepo.findAllByPetitionIdx(petitionIdx, pageable))
     }
 
-    override fun writeAgree(agreeDto: AgreeDto, userID:String) {
+    override fun writeAgree(agreeDto: AgreeDto, userID:String): Mono<Unit> {
         val agree = Agree()
 
         val isAgree = agreeRepo.findAllByPetitionIdxAndWriterID(agreeDto.petitionIdx!!, userID).isNotEmpty()
@@ -38,6 +39,8 @@ class AgreeServiceImpl:AgreeService {
         agree.content = agreeDto.content
         agree.writerID = userID
 
-        agreeRepo.save(agree)
+        return Mono.justOrEmpty(agreeRepo.save(agree))
+            .switchIfEmpty(Mono.error(HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR,"등록 실패")))
+            .flatMap{ Mono.just(Unit) }
     }
 }

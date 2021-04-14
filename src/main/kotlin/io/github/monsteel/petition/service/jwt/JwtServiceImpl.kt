@@ -10,14 +10,16 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpClientErrorException
+import reactor.core.publisher.Mono
+import reactor.core.publisher.switchIfEmpty
 import java.security.Key
 import java.util.*
 import javax.crypto.spec.SecretKeySpec
 
 @Service
-class  JwtServiceImpl: JwtService {
-    @Autowired
-    private lateinit var userRepo: UserRepo
+class JwtServiceImpl(
+    private val userRepo: UserRepo
+): JwtService {
 
     @Value("\${jwt.secret.access}")
     private val secretAccessKey: String? = null
@@ -68,7 +70,7 @@ class  JwtServiceImpl: JwtService {
      * 토큰 검증
      * @return User
      */
-    override fun validateToken(token: String?): User? {
+    override fun validateToken(token: String?): Mono<User?> {
         try {
             val signatureAlgorithm: SignatureAlgorithm = SignatureAlgorithm.HS256
 
@@ -79,23 +81,22 @@ class  JwtServiceImpl: JwtService {
                     .body
 
             if (claims["authType"].toString() != "ACCESS") {
-                throw HttpClientErrorException(HttpStatus.UNAUTHORIZED, "토큰 타입이 아님.")
+                return Mono.error(HttpClientErrorException(HttpStatus.UNAUTHORIZED, "토큰 타입이 아님."))
             }
 
-            return userRepo.findByIdx(claims["idx"].toString().toLong())
-                    ?: throw HttpClientErrorException(HttpStatus.NOT_FOUND, "유저 없음.")
+            return Mono.justOrEmpty(userRepo.findByIdx(claims["idx"].toString().toLong()))
+                .switchIfEmpty(Mono.error(HttpClientErrorException(HttpStatus.NOT_FOUND, "유저 없음.")))
 
         } catch (e: ExpiredJwtException) {
-            throw HttpClientErrorException(HttpStatus.GONE, "토큰 만료.")
+            return Mono.error(HttpClientErrorException(HttpStatus.GONE, "토큰 만료."))
         } catch (e: SignatureException) {
-            throw HttpClientErrorException(HttpStatus.UNAUTHORIZED, "토큰 위조.")
+            return Mono.error(HttpClientErrorException(HttpStatus.UNAUTHORIZED, "토큰 위조."))
         } catch (e: MalformedJwtException) {
-            throw HttpClientErrorException(HttpStatus.UNAUTHORIZED, "토큰 위조.")
+            return Mono.error(HttpClientErrorException(HttpStatus.UNAUTHORIZED, "토큰 위조."))
         } catch (e: IllegalArgumentException) {
-            throw HttpClientErrorException(HttpStatus.BAD_REQUEST, "토큰 없음.")
+            return Mono.error(HttpClientErrorException(HttpStatus.BAD_REQUEST, "토큰 없음."))
         } catch (e: Exception) {
-            e.printStackTrace()
-            throw HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류.")
+            return Mono.error(HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류."))
         }
     }
 
