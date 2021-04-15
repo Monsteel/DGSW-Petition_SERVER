@@ -12,7 +12,7 @@ class TokenRouter(
     private val handler: TokenHandler
 ) {
     @Bean
-    fun routerAuth() = RouterFunctions.nest(RequestPredicates.path("/token"),
+    fun routerToken() = RouterFunctions.nest(RequestPredicates.path("/token"),
         router {
             listOf(
                 POST("/refresh", handler::refreshToken),
