@@ -104,10 +104,10 @@ class JwtServiceImpl(
      * 토큰 갱신
      * @return refresh token
      */
-    override fun refreshToken(refreshToken: String?): String? {
+    override fun refreshToken(refreshToken: String?): Mono<String?> {
         try {
             if (refreshToken == null || refreshToken.trim().isEmpty()) {
-                throw HttpClientErrorException(HttpStatus.BAD_REQUEST, "검증 오류.")
+                return Mono.error(HttpClientErrorException(HttpStatus.BAD_REQUEST, "검증 오류."))
             }
 
             val signingKey: Key = SecretKeySpec(secretRefreshKey!!.toByteArray(), signatureAlgorithm.jcaName)
@@ -117,20 +117,20 @@ class JwtServiceImpl(
                     .body
 
             val user: User = userRepo.findByIdx(claims["idx"].toString().toLong())
-                    ?: throw HttpClientErrorException(HttpStatus.NOT_FOUND, "유저 없음.")
+                    ?: return Mono.error(HttpClientErrorException(HttpStatus.NOT_FOUND, "유저 없음."))
 
-            return createToken(user.idx!!, JwtType.ACCESS)
+            return Mono.just(createToken(user.idx!!, JwtType.ACCESS))
         } catch (e: ExpiredJwtException) {
-            throw HttpClientErrorException(HttpStatus.GONE, "토큰 만료.")
+            return Mono.error(HttpClientErrorException(HttpStatus.GONE, "토큰 만료."))
         } catch (e: SignatureException) {
-            throw HttpClientErrorException(HttpStatus.UNAUTHORIZED, "토큰 위조.")
+            return Mono.error(HttpClientErrorException(HttpStatus.UNAUTHORIZED, "토큰 위조."))
         } catch (e: MalformedJwtException) {
-            throw HttpClientErrorException(HttpStatus.UNAUTHORIZED, "토큰 위조.")
+            return Mono.error(HttpClientErrorException(HttpStatus.UNAUTHORIZED, "토큰 위조."))
         } catch (e: IllegalArgumentException) {
-            throw HttpClientErrorException(HttpStatus.BAD_REQUEST, "토큰 없음.")
+            return Mono.error(HttpClientErrorException(HttpStatus.BAD_REQUEST, "토큰 없음."))
         } catch (e: Exception) {
             e.printStackTrace()
-            throw HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류.")
+            return Mono.error(HttpClientErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "서버 오류."))
         }
     }
 }
