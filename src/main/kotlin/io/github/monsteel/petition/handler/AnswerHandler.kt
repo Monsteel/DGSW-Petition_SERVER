@@ -22,7 +22,7 @@ class AnswerHandler(
     private val jwtService: JwtServiceImpl
 ) {
     fun getAnswer(request: ServerRequest): Mono<ServerResponse> =
-        Mono.just(request.pathVariable("idx"))
+        Mono.just(request.pathVariable("petitionIdx"))
             .flatMap { answerService.fetchAnswer(it.toLong()) }
             .flatMap { Mono.just(it.map { answer -> AnswerDetailInfo(answer.idx!!, answer.petitionIdx!!, answer.writerID!!, answer.createdAt, answer.content!!) }) }
             .flatMap { DataResponse(HttpStatus.OK, "조회 완료", it).toServerResponse() }
