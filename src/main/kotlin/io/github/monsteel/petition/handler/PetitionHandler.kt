@@ -20,8 +20,6 @@ import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import javax.validation.Validator
-
 
 @Component
 class PetitionHandler(
@@ -38,7 +36,8 @@ class PetitionHandler(
             request.queryParam("page").orElse("0").toInt(),
             request.queryParam("size").orElse("30").toInt(),
             PetitionFetchType.values().first { it.value == request.queryParam("type").orElse("3").toInt() }
-        ).flatMap { DataResponse(HttpStatus.OK, "조회 성공", convertToPetitionSimpleInfoList(it)).toServerResponse() }
+        ).flatMap { convertToPetitionSimpleInfoList(it) }
+            .flatMap { DataResponse(HttpStatus.OK, "조회 성공", it).toServerResponse() }
 
     /**
      * 청원 검색 API
@@ -50,7 +49,9 @@ class PetitionHandler(
                 request.queryParam("page").orElse("0").toInt(),
                 request.queryParam("size").orElse("30").toInt(),
                 request.queryParam("keyword").orElse("")
-            )}.flatMap { DataResponse(HttpStatus.OK, "검색 성공", convertToPetitionSimpleInfoList(it)).toServerResponse() }
+            )}
+            .flatMap { convertToPetitionSimpleInfoList(it) }
+            .flatMap { DataResponse(HttpStatus.OK, "검색 성공", it).toServerResponse() }
 
     /**
      * 청원 작성 API
@@ -94,9 +95,9 @@ class PetitionHandler(
 
 
 
-    private fun convertToPetitionSimpleInfoList(petitionList: List<Petition>): Mono<PetitionSimpleInfo> =
+    private fun convertToPetitionSimpleInfoList(petitionList: List<Petition>): Mono<List<PetitionSimpleInfo>> =
         Flux.fromIterable(petitionList).flatMap { petition ->
             Mono.zip(Mono.just(petition), agreeService.fetchAgreeCount(petition.idx!!), answerService.fetchAnswer(petition.idx!!))
                 .flatMap { Mono.just(PetitionSimpleInfo(it.t1.idx, it.t1.expirationDate, it.t1.category!!, it.t1.title!!, it.t2, it.t3.isNotEmpty())) }
-        }.next()
+        }.collectList()
 }

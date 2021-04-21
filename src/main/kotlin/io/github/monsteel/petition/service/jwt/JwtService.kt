@@ -7,5 +7,5 @@ import reactor.core.publisher.Mono
 interface JwtService {
     fun createToken(idx: Long, typeType: JwtType): String
     fun validateToken(token: String?): Mono<User?>
-    fun refreshToken(refreshToken: String?): String?
+    fun refreshToken(refreshToken: String?): Mono<String?>
 }
