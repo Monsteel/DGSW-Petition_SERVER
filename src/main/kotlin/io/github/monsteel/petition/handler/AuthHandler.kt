@@ -13,12 +13,9 @@ import io.github.monsteel.petition.util.extension.toServerResponse
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
 import org.springframework.web.client.HttpClientErrorException
-import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.reactive.function.server.ServerRequest
 import org.springframework.web.reactive.function.server.ServerResponse
-import org.springframework.web.server.ServerErrorException
 import reactor.core.publisher.Mono
-import javax.validation.Validator
 
 @Component
 class AuthHandler(
@@ -27,6 +24,7 @@ class AuthHandler(
 ) {
     fun login(request: ServerRequest): Mono<ServerResponse> =
         request.bodyToMono(UserLoginDto::class.java)
+            .switchIfEmpty(Mono.error(HttpClientErrorException(HttpStatus.BAD_REQUEST, "잘못된 요청")))
             .flatMap(authService::login)
             .flatMap { Mono.zip(Mono.just(jwtService.createToken(it.idx!!, JwtType.ACCESS)), Mono.just(jwtService.createToken(it.idx!!, JwtType.REFRESH))) }
             .flatMap { DataResponse(HttpStatus.OK, "로그인 성공", UserToken(it.t1,it.t2)).toServerResponse() }
@@ -34,14 +32,19 @@ class AuthHandler(
 
     fun register(request: ServerRequest): Mono<ServerResponse> =
         request.bodyToMono(UserRegisterDto::class.java)
+            .switchIfEmpty(Mono.error(HttpClientErrorException(HttpStatus.BAD_REQUEST, "잘못된 요청")))
             .flatMap(authService::register)
             .flatMap { Response(HttpStatus.OK, "회원가입 성공").toServerResponse() }
             .onErrorResume { it.toServerResponse() }
 
     fun checkRegisteredUser(request: ServerRequest): Mono<ServerResponse> =
-        Mono.justOrEmpty(request.queryParam("userId").toString())
-            .flatMap { if (it.isEmpty()) Mono.error(HttpClientErrorException(HttpStatus.BAD_REQUEST,"잘못된 요청")) else Mono.just(it) }
-            .flatMap(authService::checkRegisteredUser)
+        Mono.justOrEmpty(request.queryParam("userId"))
+            .switchIfEmpty(Mono.error(HttpClientErrorException(HttpStatus.BAD_REQUEST, "잘못된 요청")))
+            .flatMap { checkRegisteredUser(it) }
+            .onErrorResume { it.toServerResponse() }
+
+    private fun checkRegisteredUser(userID: String) =
+        authService.checkRegisteredUser(userID)
             .flatMap { DataResponse(HttpStatus.OK, "조회 성공", UserInquiry(false)).toServerResponse() }
             .onErrorResume { DataResponse(HttpStatus.OK, "조회 성공", UserInquiry(true)).toServerResponse() }
 }

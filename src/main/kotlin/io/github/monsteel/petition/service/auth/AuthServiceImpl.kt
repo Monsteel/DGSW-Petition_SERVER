@@ -12,6 +12,7 @@ import io.github.monsteel.petition.util.enum.PermissionType
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.web.client.HttpServerErrorException
 import reactor.core.publisher.Mono
+import reactor.core.publisher.switchIfEmpty
 
 
 @Service
@@ -31,15 +32,15 @@ class AuthServiceImpl(
      */
     override fun register(userRegisterDto: UserRegisterDto): Mono<Unit> =
         Mono.just(checkValidRequest(userRegisterDto.googleToken, userRegisterDto.userID))
-            .flatMap { Mono.just(checkRegisteredUser(userRegisterDto.userID)) }
+            .flatMap { checkRegisteredUser(userRegisterDto.userID) }
             .flatMap { save(userRegisterDto) }
 
     /**
      * 로그인
      */
     override fun login(userLoginDto: UserLoginDto): Mono<User> =
-        Mono.just(checkValidRequest(userLoginDto.googleToken, userLoginDto.userID))
-            .flatMap { Mono.justOrEmpty(userRepo.findByUserID(it.block().toString())) }
+        checkValidRequest(userLoginDto.googleToken, userLoginDto.userID)
+            .flatMap { Mono.just(userRepo.findAllByUserID(it).first()) }
             .switchIfEmpty(Mono.error(HttpClientErrorException(HttpStatus.UNAUTHORIZED, "가입되지 않은 사용자")))
 
     /**
@@ -49,15 +50,15 @@ class AuthServiceImpl(
         Mono.justOrEmpty(oAuthRepo.fetchUserID(googleToken.toString()))
             .switchIfEmpty(Mono.error(HttpClientErrorException(HttpStatus.UNAUTHORIZED, "비정상적인 요청")))
             .flatMap { if(it == userID.toString()) Mono.just(it) else Mono.error(HttpClientErrorException(HttpStatus.UNAUTHORIZED, "비정상적인 요청")) }
-
     /**
      * 이미 가입된 유저인지 확인
      */
     override fun checkRegisteredUser(userID: String?): Mono<Unit> =
-        Mono.justOrEmpty(userRepo.findByUserID(userID.toString()))
-            .flatMap { if (it == null) Mono.just(Unit) else Mono.error(HttpClientErrorException(HttpStatus.BAD_REQUEST, "이미 가입 된 사용자")) }
-
-
+        Mono.just(userRepo.findAllByUserID(userID.toString()))
+            .flatMap {
+                if(it.isEmpty()){  Mono.just(Unit) }
+                else{  Mono.error(HttpClientErrorException(HttpStatus.BAD_REQUEST, "이미 가입 된 사용자")) }
+            }
 
     /**
      * 회원 저장
