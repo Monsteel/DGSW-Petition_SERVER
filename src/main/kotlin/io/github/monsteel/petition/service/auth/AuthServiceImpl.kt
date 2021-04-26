@@ -31,7 +31,7 @@ class AuthServiceImpl(
      * 회원가입
      */
     override fun register(userRegisterDto: UserRegisterDto): Mono<Unit> =
-        Mono.just(checkValidRequest(userRegisterDto.googleToken, userRegisterDto.userID))
+        checkValidRequest(userRegisterDto.googleToken, userRegisterDto.userID)
             .flatMap { checkRegisteredUser(userRegisterDto.userID) }
             .flatMap { save(userRegisterDto) }
 
