@@ -40,7 +40,7 @@ class PetitionHandler(
             .flatMap { DataResponse(HttpStatus.OK, "조회 성공", it).toServerResponse() }
 
     /**
-     * 청원 조회 API
+     * 상위 랭킹 청원 조회 API
      */
     fun getPetitionRanking(request: ServerRequest): Mono<ServerResponse> =
             Mono.just(request.queryParam("amount").orElse("10").toInt())

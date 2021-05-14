@@ -25,6 +25,5 @@ class PetitionRouter(
                 DELETE("/{idx}", handler::deletePetition)
             )
         }
-    )
-//            .filter(jwtFilter)
+    ).filter(jwtFilter)
 }
