@@ -5,13 +5,14 @@ import com.google.gson.JsonObject
 import org.springframework.http.HttpMethod
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.stereotype.Component
 import org.springframework.stereotype.Repository
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
 import org.springframework.web.client.RestTemplate
 import java.lang.Exception
 
-@Repository
+@Component
 class OAuthRepo {
     fun fetchUserID(googleToken: String): String? {
         lateinit var rs: ResponseEntity<String>

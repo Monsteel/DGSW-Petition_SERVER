@@ -5,6 +5,7 @@ import javax.validation.constraints.NotBlank
 class AgreeDto {
     @NotBlank
     var petitionIdx: Long? = null
+
     @NotBlank
     var content:String? = null
 }

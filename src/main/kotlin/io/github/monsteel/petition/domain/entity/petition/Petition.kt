@@ -1,31 +1,31 @@
 package io.github.monsteel.petition.domain.entity.petition
 
+import io.github.monsteel.petition.domain.entity.User
 import io.github.monsteel.petition.util.extension.getPetitionValidityDate
 import org.hibernate.annotations.CreationTimestamp
 import java.util.*
 import javax.persistence.*
 
 @Entity(name = "petition")
-class Petition {
+class Petition() {
     // 청원 번호
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "idx",unique = true)
     var idx: Long? = null
 
-    // 청원인 아이디
-    @Column(nullable = false)
-    var writerID: String? = null
+    @ManyToOne(targetEntity = User::class, fetch = FetchType.EAGER)
+    @JoinColumn(columnDefinition = "userID")
+    var user: User? = null
 
     // 청원 날짜
     @CreationTimestamp()
     @Column(nullable = false)
-    var createdAt: Date = Date()
+    var createdAt: Date? = null
 
     // 청원 날짜
     @CreationTimestamp()
     @Column(nullable = false)
-    var expirationDate: Date = createdAt.getPetitionValidityDate()
+    var expirationDate: Date? = null
 
     // 카테고리
     @Column(nullable = false)
@@ -39,7 +39,6 @@ class Petition {
     @Column(nullable = false)
     var content:String? = null
 
-
     // 검색태그
     @Column(nullable = true)
     var firstKeyword:String? = null
@@ -52,23 +51,17 @@ class Petition {
     @Column(nullable = true)
     var thirdKeyword:String? = null
 
-
-    fun init(
-        writerID: String?,
-        category: String?,
-        title: String?,
-        content: String?,
-        firstKeyword: String?,
-        secondKeyword: String?,
-        thirdKeyword: String?
-    ) {
-        this.writerID = writerID
+    constructor(user: User?, category: String?, title: String?, content: String?, firstKeyword: String?, secondKeyword: String?, thirdKeyword: String?): this() {
+        this.user = user
         this.category = category
         this.title = title
         this.content = content
         this.firstKeyword = firstKeyword
         this.secondKeyword = secondKeyword
         this.thirdKeyword = thirdKeyword
+
+        this.createdAt = Date()
+        this.expirationDate = createdAt!!.getPetitionValidityDate()
     }
 
     fun mod(

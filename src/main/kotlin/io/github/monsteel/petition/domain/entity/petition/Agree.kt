@@ -1,30 +1,43 @@
 package io.github.monsteel.petition.domain.entity.petition
 
+import io.github.monsteel.petition.domain.entity.User
 import org.hibernate.annotations.CreationTimestamp
 import java.util.*
+import javax.jws.soap.SOAPBinding
 import javax.persistence.*
 
 @Entity(name = "agree")
-class Agree {
+class Agree() {
     // 동의 번호
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var idx: Long? = null
 
-    // 청원 번호
-    @Column(nullable = false, unique = true)
-    var petitionIdx: Long? = null
+    @ManyToOne(targetEntity = Petition::class, fetch = FetchType.EAGER)
+    @JoinColumn(columnDefinition = "idx")
+    var petition: Petition? = null
 
-    // 동의자 아이디
-    @Column(nullable = false, unique = true)
-    var writerID: String? = null
+    @ManyToOne(targetEntity = User::class, fetch = FetchType.EAGER)
+    @JoinColumn(columnDefinition = "userID")
+    var user: User? = null
 
     // 동의 날짜
     @CreationTimestamp()
     @Column(nullable = false)
-    var createdAt: Date = Date()
+    var createdAt: Date? = null
 
     // 동의 내용
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     var content:String? = null
+
+    constructor(petitionIdx: Long?, user: User?, content: String?): this() {
+        val petition = Petition()
+        petition.idx = petitionIdx
+
+        this.petition = petition
+        this.user = user
+        this.content = content
+
+        this.createdAt = Date()
+    }
 }

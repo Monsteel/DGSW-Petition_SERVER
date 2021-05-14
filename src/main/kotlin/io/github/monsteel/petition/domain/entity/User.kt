@@ -10,6 +10,7 @@ class User() {
     // 순서
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false, unique = true)
     var idx: Long? = null
 
     // 아이디
