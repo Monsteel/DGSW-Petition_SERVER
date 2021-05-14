@@ -1,8 +1,8 @@
-package io.github.monsteel.petition.domain.model.petition.answer
+package io.github.monsteel.petition.domain.model.petition.agree
 
 import java.util.*
 
-class AnswerDetailInfo {
+class AgreeDetailInfo {
     var idx: Long? = null
     var petitionIdx: Long
     var userID: String

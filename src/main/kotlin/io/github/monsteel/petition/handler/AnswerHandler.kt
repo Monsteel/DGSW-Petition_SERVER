@@ -24,7 +24,7 @@ class AnswerHandler(
     fun getAnswer(request: ServerRequest): Mono<ServerResponse> =
         Mono.just(request.pathVariable("petitionIdx"))
             .flatMap { answerService.fetchAnswer(it.toLong()) }
-            .flatMap { Mono.just(it.map { answer -> AnswerDetailInfo(answer.idx!!, answer.petitionIdx!!, answer.writerID!!, answer.createdAt, answer.content!!) }) }
+            .flatMap { Mono.just(it.map { answer -> AnswerDetailInfo(answer.idx!!, answer.petition!!.idx!!, answer.user!!.userID!!, answer.createdAt!!, answer.content!!) }) }
             .flatMap { DataResponse(HttpStatus.OK, "조회 완료", it).toServerResponse() }
             .onErrorResume { it.toServerResponse() }
 
@@ -38,7 +38,7 @@ class AnswerHandler(
                     return@flatMap Mono.just(it)
                 }
             }
-            .flatMap { answerService.writeAnswer(it.t1,it.t2.userID.toString()) }
+            .flatMap { answerService.writeAnswer(it.t1,it.t2) }
             .flatMap { Response(HttpStatus.OK, "작성 완료").toServerResponse() }
             .onErrorResume { it.toServerResponse() }
 }

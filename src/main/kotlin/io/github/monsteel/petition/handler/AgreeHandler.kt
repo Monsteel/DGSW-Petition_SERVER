@@ -3,6 +3,8 @@ package io.github.monsteel.petition.handler
 import io.github.monsteel.petition.domain.dto.petition.agree.AgreeDto
 import io.github.monsteel.petition.domain.model.DataResponse
 import io.github.monsteel.petition.domain.model.Response
+import io.github.monsteel.petition.domain.model.petition.agree.AgreeDetailInfo
+import io.github.monsteel.petition.domain.model.petition.answer.AnswerDetailInfo
 import io.github.monsteel.petition.service.jwt.JwtServiceImpl
 import io.github.monsteel.petition.service.petition.agree.AgreeServiceImpl
 import io.github.monsteel.petition.util.extension.toServerResponse
@@ -26,13 +28,14 @@ class AgreeHandler(
                 request.queryParam("size").orElse("30").toInt(),
                 request.queryParam("petitionIdx").orElse("").toLong()
             )}
+            .flatMap { Mono.just(it.map { agree -> AgreeDetailInfo(agree.idx!!, agree.petition!!.idx!!, agree.user!!.userID!!, agree.createdAt!!, agree.content!!) }) }
             .flatMap { DataResponse(HttpStatus.OK, "조회 성공", it).toServerResponse() }
             .onErrorResume { it.toServerResponse() }
 
     fun agree(request: ServerRequest): Mono<ServerResponse> =
         request.bodyToMono(AgreeDto::class.java)
             .flatMap { Mono.zip(Mono.just(it), jwtService.validateToken(request.headers().firstHeader("x-access-token"))) }
-            .flatMap { agreeService.writeAgree(it.t1,it.t2.userID.toString()) }
+            .flatMap { agreeService.writeAgree(it.t1,it.t2) }
             .flatMap { Response(HttpStatus.OK, "동의 완료").toServerResponse() }
             .onErrorResume { it.toServerResponse() }
 }

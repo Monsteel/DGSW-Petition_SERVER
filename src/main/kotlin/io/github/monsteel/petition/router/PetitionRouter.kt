@@ -18,11 +18,13 @@ class PetitionRouter(
         router {
             listOf(
                 GET("", handler::getPetitions),
+                GET("/ranks", handler::getPetitionRanking),
                 GET("/search", handler::searchPetition),
                 POST("", handler::writePetition),
                 PUT("/{idx}", handler::editPetition),
                 DELETE("/{idx}", handler::deletePetition)
             )
         }
-    ).filter(jwtFilter)
+    )
+//            .filter(jwtFilter)
 }

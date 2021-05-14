@@ -1,7 +1,9 @@
 package io.github.monsteel.petition.service.petition.bulletin
 
 import io.github.monsteel.petition.domain.dto.petition.bulletin.PetitionDto
+import io.github.monsteel.petition.domain.entity.User
 import io.github.monsteel.petition.domain.entity.petition.Petition
+import io.github.monsteel.petition.domain.repository.petition.AgreeRepo
 import io.github.monsteel.petition.domain.repository.petition.AnswerRepo
 import io.github.monsteel.petition.domain.repository.petition.PetitionRepo
 import io.github.monsteel.petition.service.jwt.JwtServiceImpl
@@ -13,14 +15,14 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
-import org.springframework.web.server.ResponseStatusException
-import org.springframework.web.server.ServerErrorException
 import reactor.core.publisher.Mono
+import java.time.temporal.TemporalAmount
 
 @Service
 class PetitionServiceImpl(
     private val petitionRepo: PetitionRepo,
-    private val answerRepo: AnswerRepo
+    private val answerRepo: AnswerRepo,
+    private val agreeRepo: AgreeRepo
 ):PetitionService {
     override fun fetchPetitions(page:Int, size:Int, type:PetitionFetchType): Mono<List<Petition>> {
         val pageable = PageRequest.of(page, size, Sort.by("createdAt").descending())
@@ -33,7 +35,7 @@ class PetitionServiceImpl(
                 Mono.just(petitionRepo.findAllByExpirationDateBefore(pageable))
 
             PetitionFetchType.FINISHED ->
-                Mono.just(answerRepo.findAll().map { petitionRepo.findByIdx(it.petitionIdx!!) })
+                Mono.just(answerRepo.findAll().map { petitionRepo.findByIdx(it.petition!!.idx!!) })
 
             PetitionFetchType.ALL ->
                 Mono.just(petitionRepo.findAll(pageable).toList())
@@ -45,32 +47,21 @@ class PetitionServiceImpl(
         return Mono.just(petitionRepo.findAllByTitleContainsOrFirstKeywordContainsOrSecondKeywordContainsOrThirdKeywordContains(keyword,keyword,keyword,keyword,pageable))
     }
 
-    override fun fetchTopTenPetition(page:Int, size:Int): List<Petition> {
-        return petitionRepo.findAll(PageRequest.of(0, 10, Sort.by("동의 수").descending())).toList()
+    override fun fetchPetitionRanking(amount: Int): Mono<List<Petition>> {
+        return Mono.just(agreeRepo.findRanking(PageRequest.of(0, amount)).map { petitionRepo.findByIdx(it.petitionIdx) })
     }
 
-    override fun writePetition(petitionDto: PetitionDto, userID:String): Mono<Unit> {
-        val petition = Petition()
-
-        petition.init(
-            userID,
-            petitionDto.category,
-            petitionDto.title,
-            petitionDto.content,
-            petitionDto.firstKeyword,
-            petitionDto.secondKeyword,
-            petitionDto.thirdKeyword
-        )
-
-        return Mono.justOrEmpty(petitionRepo.save(petition))
-            .switchIfEmpty(Mono.error(HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "작성 실패")))
-            .flatMap { Mono.just(Unit) }
+    override fun writePetition(petitionDto: PetitionDto, user: User): Mono<Unit> {
+        return Mono.justOrEmpty(petitionRepo.save(Petition(user,petitionDto.category, petitionDto.title,
+                petitionDto.content, petitionDto.firstKeyword, petitionDto.secondKeyword, petitionDto.thirdKeyword))
+        ).switchIfEmpty(Mono.error(HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "작성 실패")))
+         .flatMap { Mono.just(Unit) }
     }
 
-    override fun editPetition(idx:Long, petitionDto: PetitionDto, userID:String): Mono<Unit> {
+    override fun editPetition(idx:Long, petitionDto: PetitionDto, user: User): Mono<Unit> {
         val updatePetition = petitionRepo.findByIdx(idx)
 
-        if(updatePetition.writerID != userID) {
+        if(updatePetition.user!!.userID != user.userID) {
             throw HttpClientErrorException(HttpStatus.UNAUTHORIZED, "권한 없음")
         }
 
@@ -88,10 +79,10 @@ class PetitionServiceImpl(
             .flatMap { Mono.just(Unit) }
     }
 
-    override fun deletePetition(idx:Long, userID:String):Mono<Unit> {
+    override fun deletePetition(idx:Long,  user: User):Mono<Unit> {
         val deletePetition = petitionRepo.findByIdx(idx)
 
-        if(deletePetition.writerID != userID) {
+        if(deletePetition.user!!.userID != user.userID) {
             throw HttpClientErrorException(HttpStatus.UNAUTHORIZED, "권한 없음")
         }
 

@@ -40,6 +40,15 @@ class PetitionHandler(
             .flatMap { DataResponse(HttpStatus.OK, "조회 성공", it).toServerResponse() }
 
     /**
+     * 청원 조회 API
+     */
+    fun getPetitionRanking(request: ServerRequest): Mono<ServerResponse> =
+            Mono.just(request.queryParam("amount").orElse("10").toInt())
+                    .flatMap { petitionService.fetchPetitionRanking(it) }
+                    .flatMap { convertToPetitionSimpleInfoList(it) }
+                    .flatMap { DataResponse(HttpStatus.OK, "조회 성공", it).toServerResponse() }
+
+    /**
      * 청원 검색 API
      */
     fun searchPetition(request: ServerRequest): Mono<ServerResponse> =
@@ -59,7 +68,7 @@ class PetitionHandler(
     fun writePetition(request: ServerRequest): Mono<ServerResponse> =
         request.bodyToMono(PetitionDto::class.java)
             .flatMap { Mono.zip(Mono.just(it), jwtService.validateToken(request.headers().firstHeader("x-access-token"))) }
-            .flatMap { petitionService.writePetition(it.t1, it.t2.userID.toString()) }
+            .flatMap { petitionService.writePetition(it.t1, it.t2) }
             .flatMap { Response(HttpStatus.OK, "작성 완료").toServerResponse() }
 
     /**
@@ -76,7 +85,7 @@ class PetitionHandler(
                     return@flatMap Mono.error(HttpClientErrorException(HttpStatus.UNAUTHORIZED, "최소 동의인원을 초과하여 수정할 수 없음"))
                 else return@flatMap Mono.just(it)
             }
-            .flatMap { petitionService.editPetition(it.t2,it.t1,it.t3.userID.toString()) }
+            .flatMap { petitionService.editPetition(it.t2,it.t1,it.t3) }
             .flatMap { Response(HttpStatus.OK, "수정 완료").toServerResponse() }
 
     /**
@@ -90,7 +99,7 @@ class PetitionHandler(
                     return@flatMap Mono.error(HttpClientErrorException(HttpStatus.UNAUTHORIZED, "최소 동의인원을 초과하여 삭제할 수 없음"))
                 else return@flatMap Mono.just(it)
             }
-            .flatMap { petitionService.deletePetition(it.t1,it.t2.userID.toString()) }
+            .flatMap { petitionService.deletePetition(it.t1,it.t2) }
             .flatMap { Response(HttpStatus.OK, "수정 완료").toServerResponse() }
 
 
@@ -98,6 +107,6 @@ class PetitionHandler(
     private fun convertToPetitionSimpleInfoList(petitionList: List<Petition>): Mono<List<PetitionSimpleInfo>> =
         Flux.fromIterable(petitionList).flatMap { petition ->
             Mono.zip(Mono.just(petition), agreeService.fetchAgreeCount(petition.idx!!), answerService.fetchAnswer(petition.idx!!))
-                .flatMap { Mono.just(PetitionSimpleInfo(it.t1.idx, it.t1.expirationDate, it.t1.category!!, it.t1.title!!, it.t2, it.t3.isNotEmpty())) }
+                .flatMap { Mono.just(PetitionSimpleInfo(it.t1.idx, it.t1.expirationDate!!, it.t1.category!!, it.t1.title!!, it.t2, it.t3.isNotEmpty())) }
         }.collectList()
 }
