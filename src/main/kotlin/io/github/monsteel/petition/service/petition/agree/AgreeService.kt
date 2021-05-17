@@ -10,6 +10,8 @@ interface AgreeService {
 
     fun fetchAgreeCount(petitionIdx:Long): Mono<Int>
 
+    fun fetchAllAgreeCount(): Mono<Int>
+
     fun fetchAgree(page:Int, size:Int, petitionIdx:Long): Mono<List<Agree>>
 
     fun writeAgree(agreeDto: AgreeDto, user: User): Mono<Unit>

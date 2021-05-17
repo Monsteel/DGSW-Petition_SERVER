@@ -51,6 +51,10 @@ class Petition() {
     @Column(nullable = true)
     var thirdKeyword:String? = null
 
+    // 답변 내용
+    @Column(nullable = false)
+    var isAnswer:Boolean? = null
+
     constructor(user: User?, category: String?, title: String?, content: String?, firstKeyword: String?, secondKeyword: String?, thirdKeyword: String?): this() {
         this.user = user
         this.category = category
@@ -62,6 +66,7 @@ class Petition() {
 
         this.createdAt = Date()
         this.expirationDate = createdAt!!.getPetitionValidityDate()
+        this.isAnswer = false
     }
 
     fun mod(

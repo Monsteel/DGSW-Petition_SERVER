@@ -18,9 +18,13 @@ import reactor.core.publisher.Mono
 
 @Service
 class AgreeServiceImpl(
-    private val agreeRepo: AgreeRepo,
-    private val petitionRepo: PetitionRepo
+    private val agreeRepo: AgreeRepo
 ):AgreeService {
+
+    override fun fetchAllAgreeCount(): Mono<Int> {
+        return Mono.just(agreeRepo.findAllAgreeCount())
+    }
+
     override fun fetchAgreeCount(petitionIdx:Long): Mono<Int> {
         return Mono.just(agreeRepo.findAllByPetitionIdx(petitionIdx).count())
     }

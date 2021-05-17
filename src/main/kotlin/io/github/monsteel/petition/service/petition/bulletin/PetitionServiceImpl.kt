@@ -7,6 +7,7 @@ import io.github.monsteel.petition.domain.repository.petition.AgreeRepo
 import io.github.monsteel.petition.domain.repository.petition.AnswerRepo
 import io.github.monsteel.petition.domain.repository.petition.PetitionRepo
 import io.github.monsteel.petition.service.jwt.JwtServiceImpl
+import io.github.monsteel.petition.util.Constant
 import io.github.monsteel.petition.util.enum.PetitionFetchType
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.data.domain.PageRequest
@@ -48,7 +49,15 @@ class PetitionServiceImpl(
     }
 
     override fun fetchPetitionRanking(amount: Int): Mono<List<Petition>> {
-        return Mono.just(agreeRepo.findRanking(PageRequest.of(0, amount)).map { petitionRepo.findByIdx(it.petitionIdx) })
+        return Mono.just(agreeRepo.findRanking(amount).map { petitionRepo.findByIdx(it.petitionIdx) })
+    }
+
+    override fun fetchAwaitingPetition(): Mono<List<Petition>> {
+        return Mono.just(agreeRepo.findAwaitingPetitionIdx().map { petitionRepo.findByIdx(it) })
+    }
+
+    override fun fetchAwaitingPetitionCount(): Mono<Int> {
+        return Mono.just(agreeRepo.findAwaitingPetitionIdx().count())
     }
 
     override fun writePetition(petitionDto: PetitionDto, user: User): Mono<Unit> {

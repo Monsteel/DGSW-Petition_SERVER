@@ -19,6 +19,7 @@ class PetitionRouter(
             listOf(
                 GET("", handler::getPetitions),
                 GET("/ranks", handler::getPetitionRanking),
+                GET("/petition-situation", handler::getPetitionSituation),
                 GET("/search", handler::searchPetition),
                 POST("", handler::writePetition),
                 PUT("/{idx}", handler::editPetition),
