@@ -8,5 +8,7 @@ import reactor.core.publisher.Mono
 interface AnswerService {
     fun fetchAnswer(petitionIdx:Long): Mono<List<Answer>>
 
+    fun fetchAllAnswerCount(): Mono<Int>
+
     fun writeAnswer(answerDto: AnswerDto, user: User): Mono<Unit>
 }

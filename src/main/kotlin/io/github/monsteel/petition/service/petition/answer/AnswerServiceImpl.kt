@@ -16,6 +16,11 @@ class AnswerServiceImpl(
     private val answerRepo: AnswerRepo,
     private val petitionRepo: PetitionRepo
 ):AnswerService {
+
+    override fun fetchAllAnswerCount(): Mono<Int> {
+        return Mono.just(answerRepo.findAllAnswerCount())
+    }
+
     override fun fetchAnswer(petitionIdx:Long): Mono<List<Answer>> {
         return Mono.just(answerRepo.findAllByPetitionIdx(petitionIdx))
     }
@@ -24,6 +29,10 @@ class AnswerServiceImpl(
         val petition = petitionRepo.findByIdx(answerDto.petitionIdx!!)
 
         return Mono.justOrEmpty(answerRepo.save(Answer(petition, user, answerDto.content)))
+                .flatMap {
+                    petition.isAnswer = true
+                    Mono.justOrEmpty(petitionRepo.save(petition))
+                }
             .switchIfEmpty(Mono.error(HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR,"등록 실패")))
             .flatMap { Mono.just(Unit) }
     }

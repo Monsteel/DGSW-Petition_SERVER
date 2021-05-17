@@ -4,6 +4,7 @@ import io.github.monsteel.petition.domain.dto.petition.bulletin.PetitionDto
 import io.github.monsteel.petition.domain.entity.petition.Petition
 import io.github.monsteel.petition.domain.model.DataResponse
 import io.github.monsteel.petition.domain.model.Response
+import io.github.monsteel.petition.domain.model.petition.PetitionSituationInfo
 import io.github.monsteel.petition.domain.model.petition.bulletin.PetitionSimpleInfo
 import io.github.monsteel.petition.service.jwt.JwtServiceImpl
 import io.github.monsteel.petition.service.petition.agree.AgreeServiceImpl
@@ -47,6 +48,16 @@ class PetitionHandler(
                     .flatMap { petitionService.fetchPetitionRanking(it) }
                     .flatMap { convertToPetitionSimpleInfoList(it) }
                     .flatMap { DataResponse(HttpStatus.OK, "조회 성공", it).toServerResponse() }
+
+    /**
+     * 청원 현황 조회 API
+     */
+    fun getPetitionSituation(request: ServerRequest): Mono<ServerResponse> =
+            Mono.zip(agreeService.fetchAllAgreeCount(),
+                    answerService.fetchAllAnswerCount(),
+                    petitionService.fetchAwaitingPetitionCount()
+            ).flatMap { Mono.just(PetitionSituationInfo(it.t1, it.t2, it.t3)) }
+             .flatMap { DataResponse(HttpStatus.OK, "조회 성공", it).toServerResponse() }
 
     /**
      * 청원 검색 API
@@ -106,7 +117,7 @@ class PetitionHandler(
 
     private fun convertToPetitionSimpleInfoList(petitionList: List<Petition>): Mono<List<PetitionSimpleInfo>> =
         Flux.fromIterable(petitionList).flatMap { petition ->
-            Mono.zip(Mono.just(petition), agreeService.fetchAgreeCount(petition.idx!!), answerService.fetchAnswer(petition.idx!!))
-                .flatMap { Mono.just(PetitionSimpleInfo(it.t1.idx, it.t1.expirationDate!!, it.t1.category!!, it.t1.title!!, it.t2, it.t3.isNotEmpty())) }
+            Mono.zip(Mono.just(petition), agreeService.fetchAgreeCount(petition.idx!!))
+                .flatMap { Mono.just(PetitionSimpleInfo(it.t1.idx, it.t1.expirationDate!!, it.t1.category!!, it.t1.title!!, it.t2, it.t1.isAnswer!!)) }
         }.collectList()
 }

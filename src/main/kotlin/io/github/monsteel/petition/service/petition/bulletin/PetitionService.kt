@@ -13,6 +13,10 @@ interface PetitionService {
 
     fun fetchPetitionRanking(amount: Int): Mono<List<Petition>>
 
+    fun fetchAwaitingPetition(): Mono<List<Petition>>
+
+    fun fetchAwaitingPetitionCount(): Mono<Int>
+
     fun writePetition(petitionDto: PetitionDto, user: User): Mono<Unit>
 
     fun editPetition(idx:Long, petitionDto: PetitionDto, user: User): Mono<Unit>

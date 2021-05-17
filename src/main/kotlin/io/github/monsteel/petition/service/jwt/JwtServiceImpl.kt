@@ -37,7 +37,7 @@ class JwtServiceImpl(
         var expiredAt = Date()
         val secretKey: String? = when(typeType) {
             JwtType.ACCESS -> {
-                expiredAt = Date(expiredAt.time + Constant.MILLISECONDS_FOR_A_HOUR * 1)
+                expiredAt = Date(expiredAt.time + Constant.MILLISECONDS_FOR_A_HOUR * 270)
                 secretAccessKey
             }
             JwtType.REFRESH -> {
