@@ -3,6 +3,7 @@ package io.github.monsteel.petition.service.petition.bulletin
 import io.github.monsteel.petition.domain.dto.petition.bulletin.PetitionDto
 import io.github.monsteel.petition.domain.entity.User
 import io.github.monsteel.petition.domain.entity.petition.Petition
+import io.github.monsteel.petition.domain.model.petition.bulletin.PetitionSimpleInfo
 import io.github.monsteel.petition.domain.repository.petition.AgreeRepo
 import io.github.monsteel.petition.domain.repository.petition.AnswerRepo
 import io.github.monsteel.petition.domain.repository.petition.PetitionRepo
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.client.HttpClientErrorException
 import org.springframework.web.client.HttpServerErrorException
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import java.time.temporal.TemporalAmount
 
@@ -40,6 +42,9 @@ class PetitionServiceImpl(
 
             PetitionFetchType.ALL ->
                 Mono.just(petitionRepo.findAll(pageable).toList())
+
+            PetitionFetchType.AWAITING ->
+                Flux.fromIterable(agreeRepo.findAwaitingPetitionIdx(PageRequest.of(page, size))).flatMap { Mono.just(petitionRepo.findByIdx(it)) }.collectList()
         }
     }
 
