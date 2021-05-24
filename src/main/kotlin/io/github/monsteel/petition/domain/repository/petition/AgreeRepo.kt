@@ -22,6 +22,9 @@ interface AgreeRepo:JpaRepository<Agree, Long> {
     @Query("SELECT petition.idx FROM agree WHERE petition.isAnswer = false  GROUP BY petition.idx HAVING COUNT(petition) > :DO_NOT_MODIFY_AGREE_COUNT")
     fun findAwaitingPetitionIdx(@Param("DO_NOT_MODIFY_AGREE_COUNT") DO_NOT_MODIFY_AGREE_COUNT: Long = Constant.DO_NOT_MODIFY_AGREE_COUNT): List<Long>
 
+    @Query("SELECT petition.idx FROM agree WHERE petition.isAnswer = false  GROUP BY petition.idx HAVING COUNT(petition) > :DO_NOT_MODIFY_AGREE_COUNT")
+    fun findAwaitingPetitionIdx(pageable: Pageable, @Param("DO_NOT_MODIFY_AGREE_COUNT") DO_NOT_MODIFY_AGREE_COUNT: Long = Constant.DO_NOT_MODIFY_AGREE_COUNT): List<Long>
+
     @Query("SELECT new io.github.monsteel.petition.domain.repository.petition.Rank(petition.idx, COUNT(petition)) FROM agree GROUP BY petition.idx ORDER BY COUNT(petition) DESC")
     fun findRanking(amount: Int, pageable: Pageable = PageRequest.of(0, amount)): List<Rank>
 }
