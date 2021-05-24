@@ -38,7 +38,7 @@ class PetitionServiceImpl(
                 Mono.just(petitionRepo.findAllByExpirationDateBefore(pageable))
 
             PetitionFetchType.FINISHED ->
-                Mono.just(answerRepo.findAll().map { petitionRepo.findByIdx(it.petition!!.idx!!) })
+                Mono.just(answerRepo.findAll(pageable).toList().map { petitionRepo.findByIdx(it.petition!!.idx!!) })
 
             PetitionFetchType.ALL ->
                 Mono.just(petitionRepo.findAll(pageable).toList())
