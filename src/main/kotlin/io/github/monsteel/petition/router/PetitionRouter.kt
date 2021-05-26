@@ -17,6 +17,7 @@ class PetitionRouter(
     fun routerPetition() = RouterFunctions.nest(RequestPredicates.path("/petition"),
         router {
             listOf(
+                GET("/detail/{idx}", handler::getPetitionDetailInfo),
                 GET("", handler::getPetitions),
                 GET("/ranks", handler::getPetitionRanking),
                 GET("/petition-situation", handler::getPetitionSituation),

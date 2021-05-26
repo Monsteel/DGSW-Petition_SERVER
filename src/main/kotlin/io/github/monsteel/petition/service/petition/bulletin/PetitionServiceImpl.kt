@@ -27,6 +27,10 @@ class PetitionServiceImpl(
     private val answerRepo: AnswerRepo,
     private val agreeRepo: AgreeRepo
 ):PetitionService {
+    override fun fetchPetitionDetailInfo(idx: Long): Mono<Petition> {
+        return Mono.just(petitionRepo.findByIdx(idx))
+    }
+
     override fun fetchPetitions(page:Int, size:Int, type:PetitionFetchType): Mono<List<Petition>> {
         val pageable = PageRequest.of(page, size, Sort.by("createdAt").descending())
 
