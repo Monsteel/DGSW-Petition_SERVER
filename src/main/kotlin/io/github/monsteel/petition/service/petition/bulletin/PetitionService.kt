@@ -7,6 +7,8 @@ import io.github.monsteel.petition.util.enum.PetitionFetchType
 import reactor.core.publisher.Mono
 
 interface PetitionService {
+    fun fetchPetitionDetailInfo(idx: Long): Mono<Petition>
+
     fun fetchPetitions(page:Int, size:Int, type: PetitionFetchType = PetitionFetchType.ALL): Mono<List<Petition>>
 
     fun searchPetition(page:Int, size:Int, keyword:String): Mono<List<Petition>>

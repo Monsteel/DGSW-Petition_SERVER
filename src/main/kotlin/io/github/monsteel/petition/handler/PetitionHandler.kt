@@ -5,6 +5,7 @@ import io.github.monsteel.petition.domain.entity.petition.Petition
 import io.github.monsteel.petition.domain.model.DataResponse
 import io.github.monsteel.petition.domain.model.Response
 import io.github.monsteel.petition.domain.model.petition.PetitionSituationInfo
+import io.github.monsteel.petition.domain.model.petition.bulletin.PetitionDetailInfo
 import io.github.monsteel.petition.domain.model.petition.bulletin.PetitionSimpleInfo
 import io.github.monsteel.petition.service.jwt.JwtServiceImpl
 import io.github.monsteel.petition.service.petition.agree.AgreeServiceImpl
@@ -29,6 +30,16 @@ class PetitionHandler(
     private val agreeService: AgreeServiceImpl,
     private val jwtService: JwtServiceImpl
 ) {
+    /**
+     * 청원 상세 조회 API
+     */
+    fun getPetitionDetailInfo(request: ServerRequest): Mono<ServerResponse> =
+            petitionService.fetchPetitionDetailInfo(
+                    request.pathVariable("idx").toLong()
+            ).flatMap { convertToPetitionDetailInfo(it) }
+                    .flatMap { DataResponse(HttpStatus.OK, "조회 성공", it).toServerResponse() }
+
+
     /**
      * 청원 조회 API
      */
@@ -114,6 +125,23 @@ class PetitionHandler(
             .flatMap { Response(HttpStatus.OK, "수정 완료").toServerResponse() }
 
 
+
+    private fun convertToPetitionDetailInfo(petition: Petition): Mono<PetitionDetailInfo> =
+                Mono.zip(Mono.just(petition), agreeService.fetchAgreeCount(petition.idx!!))
+                        .flatMap { Mono.just(PetitionDetailInfo(
+                                                        it.t1.idx,
+                                                        it.t1.user!!.userID!!,
+                                                        it.t1.createdAt!!,
+                                                        it.t1.expirationDate!!,
+                                                        it.t1.category!!,
+                                                        it.t1.title!!,
+                                                        it.t1.content!!,
+                                                        it.t1.firstKeyword,
+                                                        it.t1.secondKeyword,
+                                                        it.t1.thirdKeyword,
+                                                        it.t2,
+                                                        it.t1.isAnswer!!))
+                        }
 
     private fun convertToPetitionSimpleInfoList(petitionList: List<Petition>): Mono<List<PetitionSimpleInfo>> =
         Flux.fromIterable(petitionList).flatMap { petition ->
