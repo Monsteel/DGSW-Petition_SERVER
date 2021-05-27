@@ -11,7 +11,7 @@ class PetitionDetailInfo {
 
     var expirationDate: Date
 
-    var category: String
+    var category: Int
 
     var title: String
 
@@ -34,7 +34,7 @@ class PetitionDetailInfo {
         writerID: String,
         createdAt: Date,
         expirationDate: Date,
-        category: String,
+        category: Int,
         title: String,
         content: String,
         fKeyword: String?,

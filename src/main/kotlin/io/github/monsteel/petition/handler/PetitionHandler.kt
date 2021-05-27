@@ -133,7 +133,7 @@ class PetitionHandler(
                                                         it.t1.user!!.userID!!,
                                                         it.t1.createdAt!!,
                                                         it.t1.expirationDate!!,
-                                                        it.t1.category!!,
+                                                        it.t1.category!!.idx!!.toInt(),
                                                         it.t1.title!!,
                                                         it.t1.content!!,
                                                         it.t1.firstKeyword,
@@ -146,6 +146,6 @@ class PetitionHandler(
     private fun convertToPetitionSimpleInfoList(petitionList: List<Petition>): Mono<List<PetitionSimpleInfo>> =
         Flux.fromIterable(petitionList).flatMap { petition ->
             Mono.zip(Mono.just(petition), agreeService.fetchAgreeCount(petition.idx!!))
-                .flatMap { Mono.just(PetitionSimpleInfo(it.t1.idx, it.t1.expirationDate!!, it.t1.category!!, it.t1.title!!, it.t2, it.t1.isAnswer!!)) }
+                .flatMap { Mono.just(PetitionSimpleInfo(it.t1.idx, it.t1.expirationDate!!, it.t1.category!!.idx!!.toInt(), it.t1.title!!, it.t2, it.t1.isAnswer!!)) }
         }.collectList()
 }

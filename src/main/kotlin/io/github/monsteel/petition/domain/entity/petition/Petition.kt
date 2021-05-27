@@ -28,8 +28,9 @@ class Petition() {
     var expirationDate: Date? = null
 
     // 카테고리
-    @Column(nullable = false)
-    var category: String? = null
+    @ManyToOne(targetEntity = Category::class, fetch = FetchType.EAGER)
+    @JoinColumn(columnDefinition = "idx")
+    var category: Category? = null
 
     // 청원 제목
     @Column(nullable = false)
@@ -55,7 +56,7 @@ class Petition() {
     @Column(nullable = false)
     var isAnswer:Boolean? = null
 
-    constructor(user: User?, category: String?, title: String?, content: String?, firstKeyword: String?, secondKeyword: String?, thirdKeyword: String?): this() {
+    constructor(user: User?, category: Category?, title: String?, content: String?, firstKeyword: String?, secondKeyword: String?, thirdKeyword: String?): this() {
         this.user = user
         this.category = category
         this.title = title
@@ -70,7 +71,7 @@ class Petition() {
     }
 
     fun mod(
-        category: String?,
+        category: Category?,
         title: String?,
         content: String?,
         firstKeyword: String?,
