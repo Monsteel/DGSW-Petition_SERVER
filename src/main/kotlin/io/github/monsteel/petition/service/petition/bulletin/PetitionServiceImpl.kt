@@ -2,10 +2,12 @@ package io.github.monsteel.petition.service.petition.bulletin
 
 import io.github.monsteel.petition.domain.dto.petition.bulletin.PetitionDto
 import io.github.monsteel.petition.domain.entity.User
+import io.github.monsteel.petition.domain.entity.petition.Category
 import io.github.monsteel.petition.domain.entity.petition.Petition
 import io.github.monsteel.petition.domain.model.petition.bulletin.PetitionSimpleInfo
 import io.github.monsteel.petition.domain.repository.petition.AgreeRepo
 import io.github.monsteel.petition.domain.repository.petition.AnswerRepo
+import io.github.monsteel.petition.domain.repository.petition.CategoryRepo
 import io.github.monsteel.petition.domain.repository.petition.PetitionRepo
 import io.github.monsteel.petition.service.jwt.JwtServiceImpl
 import io.github.monsteel.petition.util.Constant
@@ -23,6 +25,7 @@ import java.time.temporal.TemporalAmount
 
 @Service
 class PetitionServiceImpl(
+    private val categoryRepo: CategoryRepo,
     private val petitionRepo: PetitionRepo,
     private val answerRepo: AnswerRepo,
     private val agreeRepo: AgreeRepo
@@ -70,7 +73,11 @@ class PetitionServiceImpl(
     }
 
     override fun writePetition(petitionDto: PetitionDto, user: User): Mono<Unit> {
-        return Mono.justOrEmpty(petitionRepo.save(Petition(user,petitionDto.category, petitionDto.title,
+
+        val category = Category()
+        category.idx = petitionDto.category!!.toLong()
+
+        return Mono.justOrEmpty(petitionRepo.save(Petition(user,category, petitionDto.title,
                 petitionDto.content, petitionDto.firstKeyword, petitionDto.secondKeyword, petitionDto.thirdKeyword))
         ).switchIfEmpty(Mono.error(HttpServerErrorException(HttpStatus.INTERNAL_SERVER_ERROR, "작성 실패")))
          .flatMap { Mono.just(Unit) }
@@ -83,8 +90,11 @@ class PetitionServiceImpl(
             throw HttpClientErrorException(HttpStatus.UNAUTHORIZED, "권한 없음")
         }
 
+        val category = Category()
+        category.idx = petitionDto.category!!.toLong()
+
         updatePetition.mod(
-            petitionDto.category,
+            category,
             petitionDto.title,
             petitionDto.content,
             petitionDto.firstKeyword,

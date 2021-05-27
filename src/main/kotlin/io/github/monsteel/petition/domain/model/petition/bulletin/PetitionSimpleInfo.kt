@@ -7,7 +7,7 @@ class PetitionSimpleInfo {
 
     var expirationDate: Date
 
-    var category: String
+    var category: Int
 
     var title: String
 
@@ -18,7 +18,7 @@ class PetitionSimpleInfo {
     constructor(
         idx: Long?,
         expirationDate: Date,
-        category: String,
+        category: Int,
         title: String,
         agreeCount: Int?,
         isAnswer: Boolean

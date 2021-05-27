@@ -4,7 +4,7 @@ import javax.validation.constraints.NotBlank
 
 class PetitionDto {
     @NotBlank
-    var category: String? = null
+    var category: Int? = null
 
     @NotBlank
     var title:String? = null
