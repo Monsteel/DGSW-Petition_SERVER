@@ -1,11 +1,12 @@
 package io.github.monsteel.petition.domain.model.petition.bulletin
 
+import io.github.monsteel.petition.util.extension.toISOString
 import java.util.*
 
 class PetitionSimpleInfo {
     var idx: Long? = null
 
-    var expirationDate: Date
+    var expirationDate: String
 
     var category: Int
 
@@ -24,7 +25,7 @@ class PetitionSimpleInfo {
         isAnswer: Boolean
     ) {
         this.idx = idx
-        this.expirationDate = expirationDate
+        this.expirationDate = expirationDate.toISOString()
         this.category = category
         this.title = title
         this.agreeCount = agreeCount

@@ -1,5 +1,6 @@
 package io.github.monsteel.petition.domain.model.petition.bulletin
 
+import io.github.monsteel.petition.util.extension.toISOString
 import java.util.*
 
 class PetitionDetailInfo {
@@ -7,9 +8,9 @@ class PetitionDetailInfo {
 
     var writerID: String
 
-    var createdAt: Date
+    var createdAt: String
 
-    var expirationDate: Date
+    var expirationDate: String
 
     var category: Int
 
@@ -45,8 +46,8 @@ class PetitionDetailInfo {
     ) {
         this.idx = idx
         this.writerID = writerID
-        this.createdAt = createdAt
-        this.expirationDate = expirationDate
+        this.createdAt = createdAt.toISOString()
+        this.expirationDate = expirationDate.toISOString()
         this.category = category
         this.title = title
         this.content = content
