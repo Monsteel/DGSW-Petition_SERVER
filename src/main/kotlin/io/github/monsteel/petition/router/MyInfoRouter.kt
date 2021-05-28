@@ -1,7 +1,6 @@
 package io.github.monsteel.petition.router
 
-import io.github.monsteel.petition.handler.AuthHandler
-import io.github.monsteel.petition.handler.CategoryHandler
+import io.github.monsteel.petition.handler.MyInfoHandler
 import io.github.monsteel.petition.util.filter.JwtFilter
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -10,17 +9,15 @@ import org.springframework.web.reactive.function.server.RouterFunctions
 import org.springframework.web.reactive.function.server.router
 
 @Configuration
-class CategoryRouter(
-        private val handler: CategoryHandler,
-        private val jwtFilter: JwtFilter
+class MyInfoRouter(
+        private val handler: MyInfoHandler
 ) {
     @Bean
-    fun routerCategory() = RouterFunctions.nest(RequestPredicates.path("/category"),
+    fun routerMyInfo() = RouterFunctions.nest(RequestPredicates.path("/myinfo"),
             router {
                 listOf(
-                        GET("", handler::getCategories),
-                        GET("/{idx}", handler::getCategory)
+                        GET("", handler::getMyInfo)
                 )
             }
-    ).filter(jwtFilter)
+    )
 }

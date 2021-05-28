@@ -14,8 +14,7 @@ class TokenHandler(
     private val jwtService: JwtServiceImpl
 ) {
     fun refreshToken(request: ServerRequest): Mono<ServerResponse> =
-        Mono.just(request.headers().header("refreshToken"))
-            .flatMap { jwtService.refreshToken(it.toString()) }
-            .flatMap { DataResponse(HttpStatus.OK, "토큰 재발급 성공", it).toServerResponse() }
-            .onErrorResume { it.toServerResponse() }
+            jwtService.refreshToken(request.headers().firstHeader("refreshToken"))
+                    .flatMap { DataResponse(HttpStatus.OK, "토큰 재발급 성공", it).toServerResponse() }
+                    .onErrorResume { it.toServerResponse() }
 }
