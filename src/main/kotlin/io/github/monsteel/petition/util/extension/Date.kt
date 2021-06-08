@@ -6,7 +6,7 @@ import java.util.*
 
 
 fun Date.isValidPetiton():Boolean {
-    return this.before(getPetitionValidityDate())
+    return this.after(Date())
 }
 
 fun Date.getPetitionValidityDate(): Date {
